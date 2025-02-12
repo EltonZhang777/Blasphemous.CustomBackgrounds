@@ -1,6 +1,10 @@
 {
 	"name": ":smeel:",
 	"fileName": "test_animation.png",
+	"localization": {
+		"en": "Smeeling thru the pain",
+		"zh": "微啸面对危险"
+	},
 	"spriteType": "Animated",
 	"fitType": "KeepOriginalResolution",
 	"acquisitionType": "OnInitialize",

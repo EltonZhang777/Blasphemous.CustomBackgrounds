@@ -3,7 +3,9 @@ using Blasphemous.CustomBackgrounds.Components.Sprites;
 using Blasphemous.CustomBackgrounds.Extensions;
 using Blasphemous.ModdingAPI;
 using Blasphemous.ModdingAPI.Files;
+using Framework.Managers;
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,7 +24,6 @@ public class Background
     internal BackgroundInfo backgroundInfo;
     internal bool isApplied = false;
     private GameObject _gameObj;
-    private readonly FileHandler _fileHandler;
     private readonly AnimationInfo _animationInfo;
     private readonly Sprite _sprite;
 
@@ -42,6 +43,36 @@ public class Background
         }
     }
 
+    internal string LocalizedName
+    {
+        get
+        {
+            string currentLanguage = Core.Localization.GetCurrentLanguageCode();
+
+            // The language exists and localization string is not null
+            if (backgroundInfo.localization.ContainsKey(currentLanguage) && !string.IsNullOrEmpty(backgroundInfo.localization[currentLanguage]))
+            {
+                return backgroundInfo.localization[currentLanguage];
+            }
+
+            // The language doesn't exist
+            ModLog.Warn($"Localization string of {currentLanguage} for {backgroundInfo.name} doesn't exist!");
+            if (backgroundInfo.localization.ContainsKey("en"))
+            {
+                // use English if it exists
+                return backgroundInfo.localization["en"];
+            }
+            else if (backgroundInfo.localization.Count > 0)
+            {
+                // use first language with a non-null localization string if it exists
+                return backgroundInfo.localization.Values.First(x => !string.IsNullOrEmpty(x));
+            }
+
+            ModLog.Error($"Failed to localize background `{backgroundInfo.name}` to any language!");
+            return "#LOC_ERROR";
+        }
+    }
+
     /// <summary>
     /// Constructor for custom background object
     /// </summary>
@@ -51,7 +82,6 @@ public class Background
         FileHandler fileHandler,
         BackgroundInfo backgroundInfo)
     {
-        this._fileHandler = fileHandler;
         this.backgroundInfo = backgroundInfo;
         switch (backgroundInfo.spriteType)
         {
@@ -68,10 +98,6 @@ public class Background
                 }
                 break;
         }
-#if DEBUG
-        ModLog.Warn($"Background `{backgroundInfo.name}` imported sprite?: {_sprite != null}\n" +
-            $"imported animation?: {_animationInfo != null}");
-#endif
     }
 
     /// <summary>
@@ -112,7 +138,6 @@ public class Background
                 image.sprite = _sprite;
                 break;
             case BackgroundInfo.SpriteType.Animated:
-                // WIP
                 ModImageAnimator anim = _gameObj.AddComponent<ModImageAnimator>();
                 anim.Animation = _animationInfo;
                 break;

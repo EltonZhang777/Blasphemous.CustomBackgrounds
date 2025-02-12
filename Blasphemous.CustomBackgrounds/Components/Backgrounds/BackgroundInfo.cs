@@ -2,6 +2,7 @@
 using Blasphemous.CustomBackgrounds.Components.Sprites;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Collections.Generic;
 
 namespace Blasphemous.CustomBackgrounds.Components.Backgrounds;
 
@@ -9,7 +10,7 @@ public class BackgroundInfo
 {
 
     /// <summary>
-    /// The display name of the background.
+    /// The code name of the background.
     /// </summary>
     public string name;
 
@@ -17,6 +18,11 @@ public class BackgroundInfo
     /// File name of the sprite picture in `data` folder
     /// </summary>
     public string fileName;
+
+    /// <summary>
+    /// Contains localization strings
+    /// </summary>
+    public Dictionary<string, string> localization;
 
     /// <summary>
     /// Background will be granted when this flag turns true

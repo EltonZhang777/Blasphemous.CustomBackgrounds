@@ -1,5 +1,4 @@
 ﻿using Blasphemous.CustomBackgrounds.Components.Backgrounds;
-using Blasphemous.ModdingAPI;
 using Framework.Managers;
 using Gameplay.UI.Others.MenuLogic;
 using HarmonyLib;
@@ -15,8 +14,6 @@ class NewMainMenu_ProcessMoveInput_IndexExtension_Patch
         bool movingRight,
         NewMainMenu __instance,
         string ___soundOnMove,
-        Image ___background,
-        Animator ___backgroundAnimator,
         Text ___backgroundLabel)
     {
         // disable every mod background
@@ -51,7 +48,7 @@ class NewMainMenu_ProcessMoveInput_IndexExtension_Patch
         BackgroundRegister.AtIndex(Main.CustomBackgrounds.ModBackgroundIndex).SetGameObjectLayer();
 
         // update background selection's displayed label text
-        ___backgroundLabel.text = BackgroundRegister.AtIndex(Main.CustomBackgrounds.ModBackgroundIndex).backgroundInfo.name;
+        ___backgroundLabel.text = BackgroundRegister.AtIndex(Main.CustomBackgrounds.ModBackgroundIndex).LocalizedName;
 
         return false;
 
@@ -86,7 +83,7 @@ class NewMainMenu_UpdateBackgroundLabelText_UpdateModText_Patch
         if (Main.CustomBackgrounds.IsDisplayingVanillaBackground)
             return true;
 
-        ___backgroundLabel.text = BackgroundRegister.AtIndex(Main.CustomBackgrounds.ModBackgroundIndex).backgroundInfo.name;
+        ___backgroundLabel.text = BackgroundRegister.AtIndex(Main.CustomBackgrounds.ModBackgroundIndex).LocalizedName;
         return false;
     }
 }

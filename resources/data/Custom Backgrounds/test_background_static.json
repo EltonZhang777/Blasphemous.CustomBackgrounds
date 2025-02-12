@@ -1,6 +1,10 @@
 {
 	"name": "Exemplaris Blasphemiae",
 	"fileName": "test_static.png",
+	"localization": {
+		"en": "Exemplaris Blasphemiae",
+		"zh": "楷碑亵圣"
+	},
 	"spriteType": "Static",
 	"fitType": "KeepOriginalResolution",
 	"acquisitionType": "OnInitialize",
