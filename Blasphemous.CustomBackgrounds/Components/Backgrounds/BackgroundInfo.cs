@@ -21,7 +21,7 @@ public class BackgroundInfo
     /// <summary>
     /// Background will be granted when this flag turns true
     /// </summary>
-    public string acquisitionFlag;
+    public string acquisitionFlag = "";
 
     /// <summary>
     /// See <see cref="SpriteType"/>

@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Blasphemous.CustomBackgrounds.Components.Sprites;
+﻿namespace Blasphemous.CustomBackgrounds.Components.Sprites;
 
 /// <summary>
 /// Information on how sprites should be imported
@@ -20,5 +18,5 @@ public class SpriteImportInfo
     /// <summary>
     /// Normalized position the sprite is anchored to
     /// </summary>
-    public Vector3 Pivot { get; set; } = new Vector3(0.5f, 0.5f, 0.5f);
+    public Vector Pivot { get; set; } = new Vector(0.5f, 0.5f, 0.5f);
 }
