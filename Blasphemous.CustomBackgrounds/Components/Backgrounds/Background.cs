@@ -137,14 +137,14 @@ public class Background
             Pivot = new Vector2(0.5f, 0)
         };
 
-        if (!fileHandler.LoadDataAsFixedSpritesheet(importInfo.FilePath, new Vector2(importInfo.Width, importInfo.Height), out Sprite[] spritesheet, options))
+        if (!fileHandler.LoadDataAsFixedSpritesheet(backgroundInfo.fileName, new Vector2(importInfo.Width, importInfo.Height), out Sprite[] spritesheet, options))
         {
-            ModLog.Error($"Failed to load {importInfo.Name} from {importInfo.FilePath}");
+            ModLog.Error($"Failed to load {backgroundInfo.name} from {backgroundInfo.fileName}");
             animationInfo = null;
             return false;
         }
 
-        animationInfo = new AnimationInfo(importInfo.Name, spritesheet, importInfo.SecondsPerFrame);
+        animationInfo = new AnimationInfo(spritesheet, importInfo.SecondsPerFrame);
         return true;
     }
 
@@ -159,9 +159,9 @@ public class Background
             PixelsPerUnit = importInfo.PixelsPerUnit,
         };
 
-        if (!fileHandler.LoadDataAsSprite($"{importInfo.Name}.png", out sprite, options))
+        if (!fileHandler.LoadDataAsSprite(backgroundInfo.fileName, out sprite, options))
         {
-            ModLog.Error($"Failed to load sprite {importInfo.Name}");
+            ModLog.Error($"Failed to load sprite at `{backgroundInfo.fileName}`!");
             return false;
         }
 

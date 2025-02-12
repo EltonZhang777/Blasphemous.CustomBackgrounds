@@ -1,6 +1,6 @@
 {
 	"name": "Exemplaris Blasphemiae",
-	"fileName": "exemplaris_blasphemiae.png",
+	"fileName": "test_static.png",
 	"spriteType": "Static",
 	"fitType": "KeepOriginalResolution",
 	"acquisitionType": "OnInitialize",

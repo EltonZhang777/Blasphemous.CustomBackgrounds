@@ -59,6 +59,7 @@ public class CustomBackgrounds : BlasMod
     {
 #if DEBUG
         provider.RegisterBackground(new Background(FileHandler, "test_background_static.json"));
+        provider.RegisterBackground(new Background(FileHandler, "test_background_animated.json"));
 #endif
     }
 

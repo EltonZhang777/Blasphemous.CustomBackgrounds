@@ -6,11 +6,6 @@
 public class SpriteImportInfo
 {
     /// <summary>
-    /// The unique identifier of this sprite
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
     /// How many pixels take up one unit of space
     /// </summary>
     public int PixelsPerUnit { get; set; } = 32;

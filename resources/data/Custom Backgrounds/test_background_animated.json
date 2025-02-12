@@ -1,0 +1,12 @@
+{
+	"name": ":smeel:",
+	"fileName": "test_animation.png",
+	"spriteType": "Animated",
+	"fitType": "KeepOriginalResolution",
+	"acquisitionType": "OnInitialize",
+	"animationImportInfo": {
+		"Width": 1920,
+		"Height": 1080,
+		"SecondsPerFrame": 0.03333
+	}
+}
