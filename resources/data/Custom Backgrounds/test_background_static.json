@@ -1,0 +1,11 @@
+{
+	"name": "Exemplaris Blasphemiae",
+	"fileName": "exemplaris_blasphemiae.png",
+	"spriteType": "Static",
+	"fitType": "KeepOriginalResolution",
+	"acquisitionType": "OnInitialize",
+	"spriteImportInfo": {
+		"Name": "exemplaris_blasphemiae",
+        "PixelsPerUnit": 12
+	}
+}

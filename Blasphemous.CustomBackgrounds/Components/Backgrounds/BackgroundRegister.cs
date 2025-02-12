@@ -5,7 +5,7 @@ using System.Linq;
 namespace Blasphemous.CustomBackgrounds.Components.Backgrounds;
 
 /// <summary>
-/// Register handler for new language patches
+/// Register handler for new backgrounds
 /// </summary>
 public static class BackgroundRegister
 {
@@ -16,7 +16,7 @@ public static class BackgroundRegister
     internal static int Total => _backgrounds.Count;
 
     /// <summary>
-    /// Registers a new Background 
+    /// Registers a new background 
     /// </summary>
     public static void RegisterBackground(
         this ModServiceProvider provider,
