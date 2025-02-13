@@ -3,7 +3,9 @@ using Blasphemous.CustomBackgrounds.Components.Sprites;
 using Blasphemous.CustomBackgrounds.Extensions;
 using Blasphemous.ModdingAPI;
 using Blasphemous.ModdingAPI.Files;
+using Framework.Managers;
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,9 +24,11 @@ public class Background
     internal BackgroundInfo backgroundInfo;
     internal bool isApplied = false;
     private GameObject _gameObj;
-    private readonly FileHandler _fileHandler;
+    private Vector2 _spriteSize;
     private readonly AnimationInfo _animationInfo;
     private readonly Sprite _sprite;
+    private static readonly float UI_WIDTH = 640f;
+    private static readonly float UI_HEIGHT = 360f;
 
     internal GameObject GameObj
     {
@@ -42,6 +46,36 @@ public class Background
         }
     }
 
+    internal string LocalizedName
+    {
+        get
+        {
+            string currentLanguage = Core.Localization.GetCurrentLanguageCode();
+
+            // The language exists and localization string is not null
+            if (backgroundInfo.localization.ContainsKey(currentLanguage) && !string.IsNullOrEmpty(backgroundInfo.localization[currentLanguage]))
+            {
+                return backgroundInfo.localization[currentLanguage];
+            }
+
+            // The language doesn't exist
+            ModLog.Warn($"Localization string of {currentLanguage} for {backgroundInfo.name} doesn't exist!");
+            if (backgroundInfo.localization.ContainsKey("en"))
+            {
+                // use English if it exists
+                return backgroundInfo.localization["en"];
+            }
+            else if (backgroundInfo.localization.Count > 0)
+            {
+                // use first language with a non-null localization string if it exists
+                return backgroundInfo.localization.Values.First(x => !string.IsNullOrEmpty(x));
+            }
+
+            ModLog.Error($"Failed to localize background `{backgroundInfo.name}` to any language!");
+            return "#LOC_ERROR";
+        }
+    }
+
     /// <summary>
     /// Constructor for custom background object
     /// </summary>
@@ -51,7 +85,6 @@ public class Background
         FileHandler fileHandler,
         BackgroundInfo backgroundInfo)
     {
-        this._fileHandler = fileHandler;
         this.backgroundInfo = backgroundInfo;
         switch (backgroundInfo.spriteType)
         {
@@ -60,18 +93,21 @@ public class Background
                 {
                     throw new ArgumentException($"Failed loading static background `{backgroundInfo.name}`!");
                 }
+                _spriteSize = _sprite.rect.size;
                 break;
             case BackgroundInfo.SpriteType.Animated:
                 if (!TryImportAnimation(fileHandler, backgroundInfo.animationImportInfo, out _animationInfo))
                 {
                     throw new ArgumentException($"Failed loading animated background `{backgroundInfo.name}`!");
                 }
+                _spriteSize = new Vector2(backgroundInfo.animationImportInfo.Width, backgroundInfo.animationImportInfo.Height);
                 break;
         }
-#if DEBUG
-        ModLog.Warn($"Background `{backgroundInfo.name}` imported sprite?: {_sprite != null}\n" +
-            $"imported animation?: {_animationInfo != null}");
-#endif
+
+        if (backgroundInfo.acquisitionType == BackgroundInfo.AcquisitionType.OnFlag && string.IsNullOrEmpty(backgroundInfo.acquisitionFlag))
+        {
+            throw new ArgumentException($"Failed initializing background `{backgroundInfo.name}`: no flag designated for flag-acquired background!");
+        }
     }
 
     /// <summary>
@@ -91,13 +127,11 @@ public class Background
         _gameObj.transform.position = new Vector3(0f, 0f, 99f);
         _gameObj.layer = LayerMask.NameToLayer("UI");
 
-        // set RectTransform to fit screen
+        // set RectTransform
         RectTransform rectTransform = _gameObj.AddComponent<RectTransform>();
-        rectTransform.anchorMin = new Vector2(0, 0);
-        rectTransform.anchorMax = new Vector2(0, 0);
+        rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+        rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0, 0);
-        rectTransform.position = new Vector3(0f, 0f, 0f);
-        rectTransform.sizeDelta = new Vector2(640f, 360f);
 
         // set Image component
         Image image = _gameObj.AddComponent<Image>();
@@ -112,11 +146,36 @@ public class Background
                 image.sprite = _sprite;
                 break;
             case BackgroundInfo.SpriteType.Animated:
-                // WIP
                 ModImageAnimator anim = _gameObj.AddComponent<ModImageAnimator>();
                 anim.Animation = _animationInfo;
                 break;
+            default:
+                throw new NotImplementedException();
         }
+
+        // configure RectTransform to assigned FitType
+        switch (backgroundInfo.fitType)
+        {
+            case BackgroundInfo.FitType.FitScreenRatio:
+                image.preserveAspect = false;
+                rectTransform.sizeDelta = new Vector2(UI_WIDTH, UI_HEIGHT);
+                break;
+            case BackgroundInfo.FitType.KeepRatioFillScreen:
+                image.preserveAspect = true;
+                rectTransform.sizeDelta = (_spriteSize.x / _spriteSize.y) > (UI_WIDTH / UI_HEIGHT)
+                    ? _spriteSize / (_spriteSize.y / UI_HEIGHT)
+                    : _spriteSize / (_spriteSize.x / UI_WIDTH);
+                break;
+            case BackgroundInfo.FitType.KeepRatioFitScreen:
+                image.preserveAspect = true;
+                rectTransform.sizeDelta = (_spriteSize.x / _spriteSize.y) > (UI_WIDTH / UI_HEIGHT)
+                    ? _spriteSize / (_spriteSize.x / UI_WIDTH)
+                    : _spriteSize / (_spriteSize.y / UI_HEIGHT);
+                break;
+            default:
+                throw new NotImplementedException();
+        }
+        rectTransform.localPosition = rectTransform.sizeDelta / -2f;
     }
 
     internal void SetGameObjectLayer()
@@ -137,14 +196,14 @@ public class Background
             Pivot = new Vector2(0.5f, 0)
         };
 
-        if (!fileHandler.LoadDataAsFixedSpritesheet(importInfo.FilePath, new Vector2(importInfo.Width, importInfo.Height), out Sprite[] spritesheet, options))
+        if (!fileHandler.LoadDataAsFixedSpritesheet(backgroundInfo.fileName, new Vector2(importInfo.Width, importInfo.Height), out Sprite[] spritesheet, options))
         {
-            ModLog.Error($"Failed to load {importInfo.Name} from {importInfo.FilePath}");
+            ModLog.Error($"Failed to load {backgroundInfo.name} from {backgroundInfo.fileName}");
             animationInfo = null;
             return false;
         }
 
-        animationInfo = new AnimationInfo(importInfo.Name, spritesheet, importInfo.SecondsPerFrame);
+        animationInfo = new AnimationInfo(spritesheet, importInfo.SecondsPerFrame);
         return true;
     }
 
@@ -159,9 +218,9 @@ public class Background
             PixelsPerUnit = importInfo.PixelsPerUnit,
         };
 
-        if (!fileHandler.LoadDataAsSprite($"{importInfo.Name}.png", out sprite, options))
+        if (!fileHandler.LoadDataAsSprite(backgroundInfo.fileName, out sprite, options))
         {
-            ModLog.Error($"Failed to load sprite {importInfo.Name}");
+            ModLog.Error($"Failed to load sprite at `{backgroundInfo.fileName}`!");
             return false;
         }
 

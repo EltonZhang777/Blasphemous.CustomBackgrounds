@@ -2,6 +2,7 @@
 using Blasphemous.CustomBackgrounds.Components.Sprites;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Collections.Generic;
 
 namespace Blasphemous.CustomBackgrounds.Components.Backgrounds;
 
@@ -9,7 +10,7 @@ public class BackgroundInfo
 {
 
     /// <summary>
-    /// The display name of the background.
+    /// The code name of the background.
     /// </summary>
     public string name;
 
@@ -17,6 +18,11 @@ public class BackgroundInfo
     /// File name of the sprite picture in `data` folder
     /// </summary>
     public string fileName;
+
+    /// <summary>
+    /// Contains localization strings
+    /// </summary>
+    public Dictionary<string, string> localization;
 
     /// <summary>
     /// Background will be granted when this flag turns true
@@ -89,23 +95,18 @@ public class BackgroundInfo
     public enum FitType
     {
         /// <summary>
-        /// Extend image size to fit screen size
+        /// Stretch image to fit screen ratio and size
         /// </summary>
-        FitScreen,
+        FitScreenRatio,
 
         /// <summary>
-        /// Keep image original resolution and imported pixel per unit setting
+        /// Keep image original ratio, scale it down to fit screen.
         /// </summary>
-        KeepOriginalResolution,
+        KeepRatioFitScreen,
 
         /// <summary>
-        /// Only stretch image horizontally
+        /// Keep image original ratio, scale it up to fill screen.
         /// </summary>
-        FitHorizontal,
-
-        /// <summary>
-        /// Only stretch image vertically
-        /// </summary>
-        FitVertical,
+        KeepRatioFillScreen
     }
 }

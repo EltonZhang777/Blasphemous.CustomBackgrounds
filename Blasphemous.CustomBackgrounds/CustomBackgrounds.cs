@@ -7,6 +7,7 @@ namespace Blasphemous.CustomBackgrounds;
 
 public class CustomBackgrounds : BlasMod
 {
+    internal Config config;
     private int _backgroundIndex;
 
     internal int BackgroundIndex
@@ -51,14 +52,14 @@ public class CustomBackgrounds : BlasMod
     protected override void OnInitialize()
     {
         // initialize config
-        Config cfg = ConfigHandler.Load<Config>();
-        ConfigHandler.Save(cfg);
+        config = ConfigHandler.Load<Config>();
     }
 
     protected override void OnRegisterServices(ModServiceProvider provider)
     {
 #if DEBUG
         provider.RegisterBackground(new Background(FileHandler, "test_background_static.json"));
+        provider.RegisterBackground(new Background(FileHandler, "test_background_animated.json"));
 #endif
     }
 
@@ -69,5 +70,13 @@ public class CustomBackgrounds : BlasMod
             Path.Combine(FileHandler.ContentFolder, @"test_background_static_output.json"),
             JsonConvert.SerializeObject(BackgroundRegister.AtIndex(0).backgroundInfo, Formatting.Indented));
 #endif
+    }
+
+    protected override void OnDispose()
+    {
+        config.savedBackgroundIndex = IsDisplayingModBackground
+            ? BackgroundIndex
+            : Config.DEFAULT_BACKGROUND_INDEX;
+        ConfigHandler.Save(config);
     }
 }
