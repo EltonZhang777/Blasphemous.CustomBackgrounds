@@ -24,8 +24,11 @@ public class Background
     internal BackgroundInfo backgroundInfo;
     internal bool isApplied = false;
     private GameObject _gameObj;
+    private Vector2 _spriteSize;
     private readonly AnimationInfo _animationInfo;
     private readonly Sprite _sprite;
+    private static readonly float UI_WIDTH = 640f;
+    private static readonly float UI_HEIGHT = 360f;
 
     internal GameObject GameObj
     {
@@ -90,14 +93,19 @@ public class Background
                 {
                     throw new ArgumentException($"Failed loading static background `{backgroundInfo.name}`!");
                 }
+                _spriteSize = _sprite.rect.size;
                 break;
             case BackgroundInfo.SpriteType.Animated:
                 if (!TryImportAnimation(fileHandler, backgroundInfo.animationImportInfo, out _animationInfo))
                 {
                     throw new ArgumentException($"Failed loading animated background `{backgroundInfo.name}`!");
                 }
+                _spriteSize = new Vector2(backgroundInfo.animationImportInfo.Width, backgroundInfo.animationImportInfo.Height);
                 break;
         }
+#if DEBUG
+        ModLog.Warn($"sprite size of `{backgroundInfo.name}`: {_spriteSize}");
+#endif
     }
 
     /// <summary>
@@ -117,13 +125,11 @@ public class Background
         _gameObj.transform.position = new Vector3(0f, 0f, 99f);
         _gameObj.layer = LayerMask.NameToLayer("UI");
 
-        // set RectTransform to fit screen
+        // set RectTransform
         RectTransform rectTransform = _gameObj.AddComponent<RectTransform>();
-        rectTransform.anchorMin = new Vector2(0, 0);
-        rectTransform.anchorMax = new Vector2(0, 0);
+        rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+        rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0, 0);
-        rectTransform.position = new Vector3(0f, 0f, 0f);
-        rectTransform.sizeDelta = new Vector2(640f, 360f);
 
         // set Image component
         Image image = _gameObj.AddComponent<Image>();
@@ -141,7 +147,33 @@ public class Background
                 ModImageAnimator anim = _gameObj.AddComponent<ModImageAnimator>();
                 anim.Animation = _animationInfo;
                 break;
+            default:
+                throw new NotImplementedException();
         }
+
+        // configure RectTransform to assigned FitType
+        switch (backgroundInfo.fitType)
+        {
+            case BackgroundInfo.FitType.FitScreenRatio:
+                image.preserveAspect = false;
+                rectTransform.sizeDelta = new Vector2(UI_WIDTH, UI_HEIGHT);
+                break;
+            case BackgroundInfo.FitType.KeepRatioFillScreen:
+                image.preserveAspect = true;
+                rectTransform.sizeDelta = (_spriteSize.x / _spriteSize.y) > (UI_WIDTH / UI_HEIGHT)
+                    ? _spriteSize / (_spriteSize.y / UI_HEIGHT)
+                    : _spriteSize / (_spriteSize.x / UI_WIDTH);
+                break;
+            case BackgroundInfo.FitType.KeepRatioFitScreen:
+                image.preserveAspect = true;
+                rectTransform.sizeDelta = (_spriteSize.x / _spriteSize.y) > (UI_WIDTH / UI_HEIGHT)
+                    ? _spriteSize / (_spriteSize.x / UI_WIDTH)
+                    : _spriteSize / (_spriteSize.y / UI_HEIGHT);
+                break;
+            default:
+                throw new NotImplementedException();
+        }
+        rectTransform.localPosition = rectTransform.sizeDelta / -2f;
     }
 
     internal void SetGameObjectLayer()

@@ -16,14 +16,14 @@ class NewMainMenu_ProcessMoveInput_IndexExtension_Patch
         string ___soundOnMove,
         Text ___backgroundLabel)
     {
-        // disable every mod background
-        foreach (Background background in BackgroundRegister.Backgrounds)
+        // if there's a mod background currently active, disable it
+        if (Main.CustomBackgrounds.IsDisplayingModBackground)
         {
-            background.GameObj.SetActive(false);
+            int index = Main.CustomBackgrounds.ModBackgroundIndex;
+            BackgroundRegister.AtIndex(index).GameObj.SetActive(false);
         }
 
         // if the index after moving will be pointing to a vanilla background, return to executing original method instead
-        int numTotalBackgrounds = BackgroundRegister.Total + 4;
         Main.CustomBackgrounds.BackgroundIndex += movingRight ? 1 : -1;
         if (Main.CustomBackgrounds.IsDisplayingVanillaBackground)
         {

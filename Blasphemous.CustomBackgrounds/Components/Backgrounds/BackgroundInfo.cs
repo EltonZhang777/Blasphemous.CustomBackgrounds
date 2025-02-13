@@ -95,23 +95,18 @@ public class BackgroundInfo
     public enum FitType
     {
         /// <summary>
-        /// Extend image size to fit screen size
+        /// Stretch image to fit screen ratio and size
         /// </summary>
-        FitScreen,
+        FitScreenRatio,
 
         /// <summary>
-        /// Keep image original resolution and imported pixel per unit setting
+        /// Keep image original ratio, scale it down to fit screen.
         /// </summary>
-        KeepOriginalResolution,
+        KeepRatioFitScreen,
 
         /// <summary>
-        /// Only stretch image horizontally
+        /// Keep image original ratio, scale it up to fill screen.
         /// </summary>
-        FitHorizontal,
-
-        /// <summary>
-        /// Only stretch image vertically
-        /// </summary>
-        FitVertical,
+        KeepRatioFillScreen
     }
 }

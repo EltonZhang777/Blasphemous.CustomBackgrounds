@@ -6,7 +6,7 @@
 		"zh": "微啸面对危险"
 	},
 	"spriteType": "Animated",
-	"fitType": "KeepOriginalResolution",
+	"fitType": "FitScreenRatio",
 	"acquisitionType": "OnInitialize",
 	"animationImportInfo": {
 		"Width": 1920,

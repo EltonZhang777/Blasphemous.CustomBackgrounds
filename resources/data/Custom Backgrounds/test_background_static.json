@@ -6,7 +6,7 @@
 		"zh": "楷碑亵圣"
 	},
 	"spriteType": "Static",
-	"fitType": "KeepOriginalResolution",
+	"fitType": "FitScreenRatio",
 	"acquisitionType": "OnInitialize",
 	"spriteImportInfo": {
 		"Name": "exemplaris_blasphemiae",
