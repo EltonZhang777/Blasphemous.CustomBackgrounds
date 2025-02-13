@@ -103,9 +103,11 @@ public class Background
                 _spriteSize = new Vector2(backgroundInfo.animationImportInfo.Width, backgroundInfo.animationImportInfo.Height);
                 break;
         }
-#if DEBUG
-        ModLog.Warn($"sprite size of `{backgroundInfo.name}`: {_spriteSize}");
-#endif
+
+        if (backgroundInfo.acquisitionType == BackgroundInfo.AcquisitionType.OnFlag && string.IsNullOrEmpty(backgroundInfo.acquisitionFlag))
+        {
+            throw new ArgumentException($"Failed initializing background `{backgroundInfo.name}`: no flag designated for flag-acquired background!");
+        }
     }
 
     /// <summary>

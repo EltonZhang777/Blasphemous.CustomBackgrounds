@@ -87,9 +87,6 @@ class NewMainMenu_Awake_UpdateBackgroundIndexToModIndex_Patch
             Main.CustomBackgrounds.BackgroundIndex = Main.CustomBackgrounds.config.savedBackgroundIndex;
 
             // enable mod background and disable vanilla background
-            ModLog.Warn($"Setting up mod background on start-up,\n" +
-                $"index: {Main.CustomBackgrounds.config.savedBackgroundIndex},\n" +
-                $"name: {BackgroundRegister.AtIndex(Main.CustomBackgrounds.ModBackgroundIndex).backgroundInfo.name}");
             SetVanillaBackgroundActive(false);
             BackgroundRegister.AtIndex(Main.CustomBackgrounds.ModBackgroundIndex).GameObj.SetActive(true);
             BackgroundRegister.AtIndex(Main.CustomBackgrounds.ModBackgroundIndex).SetGameObjectLayer();
