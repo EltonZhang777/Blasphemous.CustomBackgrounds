@@ -1,4 +1,5 @@
 ﻿using Blasphemous.CustomBackgrounds.Components.Backgrounds;
+using Blasphemous.ModdingAPI;
 using Framework.Managers;
 using Gameplay.UI.Others.MenuLogic;
 using HarmonyLib;
@@ -60,6 +61,10 @@ class NewMainMenu_ProcessMoveInput_IndexExtension_Patch
     }
 }
 
+/// <summary>
+/// If config initialized persistent mod background, show it. 
+/// If not, update this mod's background index to vanilla index.
+/// </summary>
 [HarmonyPatch(typeof(NewMainMenu), "Awake")]
 class NewMainMenu_Awake_UpdateBackgroundIndexToModIndex_Patch
 {
@@ -71,7 +76,30 @@ class NewMainMenu_Awake_UpdateBackgroundIndexToModIndex_Patch
             return;
 
         hasExecuted = true;
-        Main.CustomBackgrounds.BackgroundIndex = __instance.bgIndex;
+        // if background index in config isn't valid, read from vanilla.
+        bool shouldReadVanilla = !Main.CustomBackgrounds.config.IsValidBackgroundIndex;
+        if (shouldReadVanilla)
+        {
+            Main.CustomBackgrounds.BackgroundIndex = __instance.bgIndex;
+        }
+        else
+        {
+            Main.CustomBackgrounds.BackgroundIndex = Main.CustomBackgrounds.config.savedBackgroundIndex;
+
+            // enable mod background and disable vanilla background
+            ModLog.Warn($"Setting up mod background on start-up,\n" +
+                $"index: {Main.CustomBackgrounds.config.savedBackgroundIndex},\n" +
+                $"name: {BackgroundRegister.AtIndex(Main.CustomBackgrounds.ModBackgroundIndex).backgroundInfo.name}");
+            SetVanillaBackgroundActive(false);
+            BackgroundRegister.AtIndex(Main.CustomBackgrounds.ModBackgroundIndex).GameObj.SetActive(true);
+            BackgroundRegister.AtIndex(Main.CustomBackgrounds.ModBackgroundIndex).SetGameObjectLayer();
+        }
+
+        void SetVanillaBackgroundActive(bool active)
+        {
+            __instance.transform.Find("Menu/StaticBackground").gameObject.SetActive(active);
+            __instance.transform.Find("Menu/AnimatedBackgroundRoot").gameObject.SetActive(active);
+        }
     }
 }
 
