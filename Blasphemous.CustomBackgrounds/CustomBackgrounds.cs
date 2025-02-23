@@ -1,25 +1,44 @@
 ﻿using Blasphemous.CustomBackgrounds.Components.Backgrounds;
+using Blasphemous.CustomBackgrounds.Extensions;
 using Blasphemous.ModdingAPI;
+using Blasphemous.ModdingAPI.Helpers;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace Blasphemous.CustomBackgrounds;
 
 public class CustomBackgrounds : BlasMod
 {
     internal Config config;
+    internal BackgroundSaveData backgroundSaveData = new();
     private int _backgroundIndex;
+    private static readonly string _saveFileName = @"BackgroundSaveData.json";
 
+    internal List<Background> UnlockedBackgrounds => BackgroundRegister.Backgrounds.Where(x => x.isUnlocked == true).ToList();
     internal int BackgroundIndex
     {
         get => _backgroundIndex;
         set
         {
-            int numTotalBackgrounds = BackgroundRegister.Total + 4;
+            int numTotalBackgrounds = UnlockedBackgrounds.Count + 4;
             if (value < 0)
-                value = numTotalBackgrounds - 1;
-            if (value >= numTotalBackgrounds)
-                value = 0;
+            {
+                do
+                {
+                    value += numTotalBackgrounds;
+                } while (value < 0);
+            }
+            else if (value >= numTotalBackgrounds)
+            {
+                do
+                {
+                    value -= numTotalBackgrounds;
+                } while (value >= numTotalBackgrounds);
+            }
+
             _backgroundIndex = value;
         }
     }
@@ -47,6 +66,8 @@ public class CustomBackgrounds : BlasMod
         get => !IsDisplayingModBackground;
     }
 
+    private string SaveFileLocation => Path.Combine(FileHandler.ContentFolder, _saveFileName);
+
     internal CustomBackgrounds() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION) { }
 
     protected override void OnInitialize()
@@ -65,18 +86,97 @@ public class CustomBackgrounds : BlasMod
 
     protected override void OnAllInitialized()
     {
+        // read save data from file
+        LoadBackgroundSave();
+
+        // show pop-up for auto-acquired backgrounds that aren't unlocked yet
+        foreach (Background background in BackgroundRegister.Backgrounds.Where(x => x.info.acquisitionType == BackgroundInfo.AcquisitionType.OnInitialize))
+        {
+            background.SetUnlocked(true);
+        }
+
+        SaveBackgroundSave();
+    }
+
+    protected override void OnLevelLoaded(string oldLevel, string newLevel)
+    {
+        if (SceneHelper.GameSceneLoaded)
+        {
+            // if displaying a mod background, store the currently displayed background's name
+            backgroundSaveData.currentModBackground = IsDisplayingModBackground
+                ? UnlockedBackgrounds[ModBackgroundIndex].info.name
+                : "";
+        }
+        else if (SceneHelper.MenuSceneLoaded)
+        {
+            if (backgroundSaveData.currentIsModBackground)
+            {
+                // restore displayed mod background according to name (because index may be changed by newly unlocked backgrounds)
+                int index = UnlockedBackgrounds.IndexOf(UnlockedBackgrounds.First(x => x.info.name == backgroundSaveData.currentModBackground));
+                UnlockedBackgrounds[ModBackgroundIndex].GameObj.SetActive(false);
+                BackgroundIndex = index + 4;
+                UnlockedBackgrounds[ModBackgroundIndex].GameObj.SetActive(true);
+            }
 #if DEBUG
-        File.WriteAllText(
-            Path.Combine(FileHandler.ContentFolder, @"test_background_static_output.json"),
-            JsonConvert.SerializeObject(BackgroundRegister.AtIndex(0).backgroundInfo, Formatting.Indented));
+            StringBuilder sb = new();
+            sb.AppendLine($"All backgrounds in register:");
+            for (int i = 0; i < BackgroundRegister.Total; i++)
+            {
+                sb.AppendLine($"#{i}: {BackgroundRegister.AtIndex(i).info.name} [unlocked?: {BackgroundRegister.AtIndex(i).isUnlocked}]");
+            }
+            sb.AppendLine($"\nAll unlocked backgrounds:");
+            for (int i = 0; i < UnlockedBackgrounds.Count; i++)
+            {
+                sb.AppendLine($"#{i}: {UnlockedBackgrounds[i].info.name}");
+            }
+            ModLog.Info(sb);
 #endif
+        }
     }
 
     protected override void OnDispose()
     {
-        config.savedBackgroundIndex = IsDisplayingModBackground
-            ? BackgroundIndex
-            : Config.DEFAULT_BACKGROUND_INDEX;
+        backgroundSaveData.currentModBackground = IsDisplayingModBackground
+            ? UnlockedBackgrounds[ModBackgroundIndex].info.name
+            : "";
+        SaveBackgroundSave();
         ConfigHandler.Save(config);
+    }
+
+    internal void LoadBackgroundSave()
+    {
+        if (!FileHandler.LoadContentAsJson(_saveFileName, out backgroundSaveData))
+        {
+            ModLog.Warn($"`{_saveFileName}` does not exist! Initializing.");
+            backgroundSaveData = new();
+            SaveBackgroundSave();
+            return;
+        }
+
+        bool hasNameNotFound = false;
+        foreach (string name in backgroundSaveData.unlockedBackgrounds)
+        {
+            ModLog.Warn($"background name: {name}");
+            if (BackgroundRegister.AtName(name) == null)
+            {
+                ModLog.Error($"Background of name {name} not found in Background Register! Failed to load it.");
+                hasNameNotFound = true;
+            }
+            else
+            {
+                BackgroundRegister.AtName(name)?.SetUnlocked(true, false);
+            }
+        }
+
+        if (hasNameNotFound)
+        {
+            SaveBackgroundSave();
+        }
+    }
+
+    internal void SaveBackgroundSave()
+    {
+        backgroundSaveData.unlockedBackgrounds = UnlockedBackgrounds.Select(x => x.info.name).ToList();
+        File.WriteAllText(SaveFileLocation, JsonConvert.SerializeObject(backgroundSaveData, Formatting.Indented));
     }
 }

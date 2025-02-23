@@ -13,6 +13,19 @@ public static class BackgroundRegister
     private static readonly List<Background> _backgrounds = new();
     internal static IEnumerable<Background> Backgrounds => _backgrounds;
     internal static Background AtIndex(int index) => _backgrounds[index];
+    internal static Background AtName(string name)
+    {
+        Background result = null;
+        try
+        {
+            result = _backgrounds.First(x => x.info.name == name);
+        }
+        catch
+        {
+            ModLog.Error($"Failed to access nonexistent background of name `{name}`");
+        }
+        return result;
+    }
     internal static int Total => _backgrounds.Count;
 
     /// <summary>
@@ -26,12 +39,12 @@ public static class BackgroundRegister
             return;
 
         // prevents repeated registering
-        if (_backgrounds.Any(x => x.backgroundInfo.name == background.backgroundInfo.name))
+        if (_backgrounds.Any(x => x.info.name == background.info.name))
             return;
 
         background.parentModId = provider.RegisteringMod.Id;
         _backgrounds.Add(background);
-        ModLog.Info($"Registered custom Background: {background.backgroundInfo.name}");
+        ModLog.Info($"Registered custom Background: {background.info.name}");
     }
 }
 

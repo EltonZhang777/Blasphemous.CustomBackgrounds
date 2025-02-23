@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Blasphemous.CustomBackgrounds.Components.Animations;
 
-[RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(Image))]
 public class ModImageAnimator : MonoBehaviour
 {
     private AnimationInfo _animation;

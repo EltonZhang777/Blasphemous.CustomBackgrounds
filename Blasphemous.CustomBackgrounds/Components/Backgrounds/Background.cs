@@ -21,8 +21,8 @@ public class Background
     /// </summary>
     public string parentModId;
 
-    internal BackgroundInfo backgroundInfo;
-    internal bool isApplied = false;
+    internal BackgroundInfo info;
+    internal bool isUnlocked = false;
     private GameObject _gameObj;
     private Vector2 _spriteSize;
     private readonly AnimationInfo _animationInfo;
@@ -53,25 +53,25 @@ public class Background
             string currentLanguage = Core.Localization.GetCurrentLanguageCode();
 
             // The language exists and localization string is not null
-            if (backgroundInfo.localization.ContainsKey(currentLanguage) && !string.IsNullOrEmpty(backgroundInfo.localization[currentLanguage]))
+            if (info.localization.ContainsKey(currentLanguage) && !string.IsNullOrEmpty(info.localization[currentLanguage]))
             {
-                return backgroundInfo.localization[currentLanguage];
+                return info.localization[currentLanguage];
             }
 
             // The language doesn't exist
-            ModLog.Warn($"Localization string of {currentLanguage} for {backgroundInfo.name} doesn't exist!");
-            if (backgroundInfo.localization.ContainsKey("en"))
+            ModLog.Warn($"Localization string of {currentLanguage} for {info.name} doesn't exist!");
+            if (info.localization.ContainsKey("en"))
             {
                 // use English if it exists
-                return backgroundInfo.localization["en"];
+                return info.localization["en"];
             }
-            else if (backgroundInfo.localization.Count > 0)
+            else if (info.localization.Count > 0)
             {
                 // use first language with a non-null localization string if it exists
-                return backgroundInfo.localization.Values.First(x => !string.IsNullOrEmpty(x));
+                return info.localization.Values.First(x => !string.IsNullOrEmpty(x));
             }
 
-            ModLog.Error($"Failed to localize background `{backgroundInfo.name}` to any language!");
+            ModLog.Error($"Failed to localize background `{info.name}` to any language!");
             return "#LOC_ERROR";
         }
     }
@@ -85,7 +85,7 @@ public class Background
         FileHandler fileHandler,
         BackgroundInfo backgroundInfo)
     {
-        this.backgroundInfo = backgroundInfo;
+        this.info = backgroundInfo;
         switch (backgroundInfo.spriteType)
         {
             case BackgroundInfo.SpriteType.Static:
@@ -108,6 +108,12 @@ public class Background
         {
             throw new ArgumentException($"Failed initializing background `{backgroundInfo.name}`: no flag designated for flag-acquired background!");
         }
+
+        if (backgroundInfo.acquisitionType == BackgroundInfo.AcquisitionType.OnInitialize)
+        {
+            //wip
+            //_isUnlocked = true;
+        }
     }
 
     /// <summary>
@@ -123,7 +129,7 @@ public class Background
 
     internal void InitializeGameObject()
     {
-        _gameObj = new GameObject($"Background[{backgroundInfo.name}]");
+        _gameObj = new GameObject($"Background[{info.name}]");
         _gameObj.transform.position = new Vector3(0f, 0f, 99f);
         _gameObj.layer = LayerMask.NameToLayer("UI");
 
@@ -140,7 +146,7 @@ public class Background
         image.type = Image.Type.Simple;
 
         // add sprite/animation to Image
-        switch (backgroundInfo.spriteType)
+        switch (info.spriteType)
         {
             case BackgroundInfo.SpriteType.Static:
                 image.sprite = _sprite;
@@ -154,7 +160,7 @@ public class Background
         }
 
         // configure RectTransform to assigned FitType
-        switch (backgroundInfo.fitType)
+        switch (info.fitType)
         {
             case BackgroundInfo.FitType.FitScreenRatio:
                 image.preserveAspect = false;
@@ -196,9 +202,9 @@ public class Background
             Pivot = new Vector2(0.5f, 0)
         };
 
-        if (!fileHandler.LoadDataAsFixedSpritesheet(backgroundInfo.fileName, new Vector2(importInfo.Width, importInfo.Height), out Sprite[] spritesheet, options))
+        if (!fileHandler.LoadDataAsFixedSpritesheet(info.fileName, new Vector2(importInfo.Width, importInfo.Height), out Sprite[] spritesheet, options))
         {
-            ModLog.Error($"Failed to load {backgroundInfo.name} from {backgroundInfo.fileName}");
+            ModLog.Error($"Failed to load {info.name} from {info.fileName}");
             animationInfo = null;
             return false;
         }
@@ -218,12 +224,30 @@ public class Background
             PixelsPerUnit = importInfo.PixelsPerUnit,
         };
 
-        if (!fileHandler.LoadDataAsSprite(backgroundInfo.fileName, out sprite, options))
+        if (!fileHandler.LoadDataAsSprite(info.fileName, out sprite, options))
         {
-            ModLog.Error($"Failed to load sprite at `{backgroundInfo.fileName}`!");
+            ModLog.Error($"Failed to load sprite at `{info.fileName}`!");
             return false;
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Set background unlocked state. If unlocking from locked state, trigger a pop-up window.
+    /// </summary>
+    public void SetUnlocked(bool unlocked, bool showPopUp = true)
+    {
+        if ((isUnlocked == false) && (unlocked == true))
+        {
+            if (showPopUp)
+                ShowUnlockPopUp();
+        }
+        isUnlocked = unlocked;
+    }
+
+    internal void ShowUnlockPopUp()
+    {
+        // wip
     }
 }
