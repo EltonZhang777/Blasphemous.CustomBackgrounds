@@ -28,6 +28,13 @@ internal static class FileHandlerExtensions
         return false;
     }
 
+    internal static void WriteJsonToContent(this FileHandler fileHandler, string fileName, object obj)
+    {
+        File.WriteAllText(
+            Path.Combine(fileHandler.ContentFolder, fileName),
+            JsonConvert.SerializeObject(obj, Formatting.Indented));
+    }
+
     private static bool ReadFileContents(this FileHandler fileHandler, string path, out string output)
     {
         if (File.Exists(path))

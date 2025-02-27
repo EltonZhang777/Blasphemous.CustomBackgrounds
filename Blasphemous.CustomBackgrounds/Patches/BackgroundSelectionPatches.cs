@@ -3,10 +3,10 @@ using Blasphemous.ModdingAPI;
 using Framework.Managers;
 using Gameplay.UI.Others.MenuLogic;
 using HarmonyLib;
-using UnityEngine;
+using System.Linq;
 using UnityEngine.UI;
 
-namespace Blasphemous.CustomBackgrounds;
+namespace Blasphemous.CustomBackgrounds.Patches;
 
 /// <summary>
 /// Makes background selection able to scroll to modded backgrounds.
@@ -20,12 +20,8 @@ class NewMainMenu_ProcessMoveInput_IndexExtension_Patch
         string ___soundOnMove,
         Text ___backgroundLabel)
     {
-        // if there's a mod background currently active, disable it
-        if (Main.CustomBackgrounds.IsDisplayingModBackground)
-        {
-            int index = Main.CustomBackgrounds.ModBackgroundIndex;
-            BackgroundRegister.AtIndex(index).GameObj.SetActive(false);
-        }
+        // disable all mod backgrounds
+        BackgroundRegister.Backgrounds.ToList().ForEach(x => x.GameObj.SetActive(false));
 
         // if the index after moving will be pointing to a vanilla background, return to executing original method instead
         Main.CustomBackgrounds.BackgroundIndex += movingRight ? 1 : -1;
@@ -43,7 +39,7 @@ class NewMainMenu_ProcessMoveInput_IndexExtension_Patch
         // play GUI audio
         if (___soundOnMove != string.Empty)
         {
-            Core.Audio.PlayOneShot(___soundOnMove, default(Vector3));
+            Core.Audio.PlayOneShot(___soundOnMove, default);
         }
 
         // enable mod background and disable vanilla background
@@ -52,7 +48,7 @@ class NewMainMenu_ProcessMoveInput_IndexExtension_Patch
         Main.CustomBackgrounds.UnlockedBackgrounds[Main.CustomBackgrounds.ModBackgroundIndex].SetGameObjectLayer();
 
         // update background selection's displayed label text
-        ___backgroundLabel.text = Main.CustomBackgrounds.UnlockedBackgrounds[Main.CustomBackgrounds.ModBackgroundIndex].LocalizedName;
+        ___backgroundLabel.text = Main.CustomBackgrounds.UnlockedBackgrounds[Main.CustomBackgrounds.ModBackgroundIndex].ColoredLocalizedName;
 
         return false;
 
@@ -79,8 +75,8 @@ class NewMainMenu_Awake_UpdateBackgroundIndexToModIndex_Patch
             return;
 
         hasExecuted = true;
-        // if background index in config isn't valid, read from vanilla.
-        bool shouldReadVanilla = !Main.CustomBackgrounds.backgroundSaveData.currentIsModBackground;
+        // if background name in save isn't valid, read from vanilla.
+        bool shouldReadVanilla = (!Main.CustomBackgrounds.backgroundSaveData.currentIsModBackground) || !BackgroundRegister.Exists(Main.CustomBackgrounds.backgroundSaveData.currentModBackground);
         if (shouldReadVanilla)
         {
             Main.CustomBackgrounds.BackgroundIndex = __instance.bgIndex;
@@ -118,7 +114,7 @@ class NewMainMenu_UpdateBackgroundLabelText_UpdateModText_Patch
         if (Main.CustomBackgrounds.IsDisplayingVanillaBackground)
             return true;
 
-        ___backgroundLabel.text = Main.CustomBackgrounds.UnlockedBackgrounds[Main.CustomBackgrounds.ModBackgroundIndex].LocalizedName;
+        ___backgroundLabel.text = Main.CustomBackgrounds.UnlockedBackgrounds[Main.CustomBackgrounds.ModBackgroundIndex].ColoredLocalizedName;
         return false;
     }
 }

@@ -1,10 +1,10 @@
-﻿using Blasphemous.CustomBackgrounds.Components.Backgrounds;
+﻿using Blasphemous.CheatConsole;
+using Blasphemous.CustomBackgrounds.Commands;
+using Blasphemous.CustomBackgrounds.Components.Backgrounds;
 using Blasphemous.CustomBackgrounds.Extensions;
 using Blasphemous.ModdingAPI;
 using Blasphemous.ModdingAPI.Helpers;
-using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -52,7 +52,6 @@ public class CustomBackgrounds : BlasMod
             return BackgroundIndex - 4;
         }
     }
-
     internal bool IsDisplayingModBackground
     {
         get
@@ -60,13 +59,10 @@ public class CustomBackgrounds : BlasMod
             return !(BackgroundIndex >= 0 && BackgroundIndex <= 3);
         }
     }
-
     internal bool IsDisplayingVanillaBackground
     {
         get => !IsDisplayingModBackground;
     }
-
-    private string SaveFileLocation => Path.Combine(FileHandler.ContentFolder, _saveFileName);
 
     internal CustomBackgrounds() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION) { }
 
@@ -74,6 +70,7 @@ public class CustomBackgrounds : BlasMod
     {
         // initialize config
         config = ConfigHandler.Load<Config>();
+        LocalizationHandler.RegisterDefaultLanguage("en");
     }
 
     protected override void OnRegisterServices(ModServiceProvider provider)
@@ -82,6 +79,7 @@ public class CustomBackgrounds : BlasMod
         provider.RegisterBackground(new Background(FileHandler, "test_background_static.json"));
         provider.RegisterBackground(new Background(FileHandler, "test_background_animated.json"));
 #endif
+        provider.RegisterCommand(new BackgroundCommand());
     }
 
     protected override void OnAllInitialized()
@@ -112,10 +110,18 @@ public class CustomBackgrounds : BlasMod
             if (backgroundSaveData.currentIsModBackground)
             {
                 // restore displayed mod background according to name (because index may be changed by newly unlocked backgrounds)
-                int index = UnlockedBackgrounds.IndexOf(UnlockedBackgrounds.First(x => x.info.name == backgroundSaveData.currentModBackground));
-                UnlockedBackgrounds[ModBackgroundIndex].GameObj.SetActive(false);
-                BackgroundIndex = index + 4;
-                UnlockedBackgrounds[ModBackgroundIndex].GameObj.SetActive(true);
+                if (!BackgroundRegister.Exists(backgroundSaveData.currentModBackground))
+                {
+                    ModLog.Warn($"Saved background does not exist! Defaulting background to `Blasphemous`.");
+                    //BackgroundIndex = 0;
+                }
+                else
+                {
+                    int index = UnlockedBackgrounds.IndexOf(UnlockedBackgrounds.First(x => x.info.name == backgroundSaveData.currentModBackground));
+                    UnlockedBackgrounds[ModBackgroundIndex].GameObj.SetActive(false);
+                    BackgroundIndex = index + 4;
+                    UnlockedBackgrounds[ModBackgroundIndex].GameObj.SetActive(true);
+                }
             }
 #if DEBUG
             StringBuilder sb = new();
@@ -177,6 +183,6 @@ public class CustomBackgrounds : BlasMod
     internal void SaveBackgroundSave()
     {
         backgroundSaveData.unlockedBackgrounds = UnlockedBackgrounds.Select(x => x.info.name).ToList();
-        File.WriteAllText(SaveFileLocation, JsonConvert.SerializeObject(backgroundSaveData, Formatting.Indented));
+        FileHandler.WriteJsonToContent(_saveFileName, backgroundSaveData);
     }
 }

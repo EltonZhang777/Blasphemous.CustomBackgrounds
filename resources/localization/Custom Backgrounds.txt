@@ -1,0 +1,11 @@
+lang: en
+
+popup.body: BACKGROUND UNLOCKED
+popup.title: New background available in the Main Menu
+popup.text: Background unlocked:
+
+lang: zh
+
+popup.body: 解锁背景
+popup.title: 新背景已在主菜单中可用
+popup.text: 背景解锁：

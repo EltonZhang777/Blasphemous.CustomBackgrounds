@@ -15,6 +15,11 @@ public class BackgroundInfo
     public string name;
 
     /// <summary>
+    /// The color of the name text when displayed in pop-up or selection tab, in HTML color string format `#RRGGBB`
+    /// </summary>
+    public string textColor;
+
+    /// <summary>
     /// File name of the sprite picture in `data` folder
     /// </summary>
     public string fileName;

@@ -9,7 +9,7 @@ public class ModImageAnimator : MonoBehaviour
     private AnimationInfo _animation;
     private float _nextUpdateTime;
     private int _currentIdx;
-    private Image image;
+    internal Image image;
 
     public AnimationInfo Animation
     {

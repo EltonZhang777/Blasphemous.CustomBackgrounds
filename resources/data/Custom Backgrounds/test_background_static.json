@@ -1,5 +1,6 @@
 {
-	"name": "Exemplaris Blasphemiae",
+	"name": "exemplaris_blasphemiae",
+	"textColor": "#ffd11a",
 	"fileName": "test_static.png",
 	"localization": {
 		"en": "Exemplaris Blasphemiae",

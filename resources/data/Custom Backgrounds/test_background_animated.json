@@ -1,5 +1,6 @@
 {
-	"name": ":smeel:",
+	"name": "smeel",
+	"textColor": "#00e600",
 	"fileName": "test_animation.png",
 	"localization": {
 		"en": "Smeeling thru the pain",

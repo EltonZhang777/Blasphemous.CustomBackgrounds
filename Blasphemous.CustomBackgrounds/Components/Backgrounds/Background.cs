@@ -1,9 +1,11 @@
 ﻿using Blasphemous.CustomBackgrounds.Components.Animations;
 using Blasphemous.CustomBackgrounds.Components.Sprites;
 using Blasphemous.CustomBackgrounds.Extensions;
+using Blasphemous.CustomBackgrounds.Patches;
 using Blasphemous.ModdingAPI;
 using Blasphemous.ModdingAPI.Files;
 using Framework.Managers;
+using Gameplay.UI;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -75,6 +77,8 @@ public class Background
             return "#LOC_ERROR";
         }
     }
+
+    internal string ColoredLocalizedName => Main.ColorString(LocalizedName, info.textColor);
 
     /// <summary>
     /// Constructor for custom background object
@@ -182,6 +186,7 @@ public class Background
                 throw new NotImplementedException();
         }
         rectTransform.localPosition = rectTransform.sizeDelta / -2f;
+        _gameObj.SetActive(false);
     }
 
     internal void SetGameObjectLayer()
@@ -248,6 +253,8 @@ public class Background
 
     internal void ShowUnlockPopUp()
     {
-        // wip
+        PatchController.unlockPopupBackgroundName = info.name;
+        UIController.instance.ShowUnlockPopup(PatchController.VANILLA_POPUP_ID);
+        PatchController.unlockPopupBackgroundName = "";
     }
 }

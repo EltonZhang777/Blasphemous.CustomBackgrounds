@@ -15,17 +15,16 @@ public static class BackgroundRegister
     internal static Background AtIndex(int index) => _backgrounds[index];
     internal static Background AtName(string name)
     {
-        Background result = null;
-        try
-        {
-            result = _backgrounds.First(x => x.info.name == name);
-        }
-        catch
+        Background result = Exists(name)
+            ? _backgrounds.First(x => x.info.name == name)
+            : null;
+        if (result == null)
         {
             ModLog.Error($"Failed to access nonexistent background of name `{name}`");
         }
         return result;
     }
+    internal static bool Exists(string name) => _backgrounds.Any(x => x.info.name == name);
     internal static int Total => _backgrounds.Count;
 
     /// <summary>
