@@ -47,7 +47,6 @@ public class Background
             _gameObj = value;
         }
     }
-
     internal string LocalizedName
     {
         get
@@ -77,7 +76,6 @@ public class Background
             return "#LOC_ERROR";
         }
     }
-
     internal string ColoredLocalizedName => Main.ColorString(LocalizedName, info.textColor);
 
     /// <summary>
@@ -108,16 +106,18 @@ public class Background
                 break;
         }
 
-        if (backgroundInfo.acquisitionType == BackgroundInfo.AcquisitionType.OnFlag && string.IsNullOrEmpty(backgroundInfo.acquisitionFlag))
+        if (backgroundInfo.acquisitionType == BackgroundInfo.AcquisitionType.OnFlag)
         {
-            throw new ArgumentException($"Failed initializing background `{backgroundInfo.name}`: no flag designated for flag-acquired background!");
+            if (string.IsNullOrEmpty(backgroundInfo.acquisitionFlag))
+            {
+                throw new ArgumentException($"Failed initializing background `{backgroundInfo.name}`: no flag designated for flag-acquired background!");
+            }
+            else
+            {
+                Main.CustomBackgrounds.EventHandler.OnFlagChange += OnFlagChange;
+            }
         }
 
-        if (backgroundInfo.acquisitionType == BackgroundInfo.AcquisitionType.OnInitialize)
-        {
-            //wip
-            //_isUnlocked = true;
-        }
     }
 
     /// <summary>
@@ -256,5 +256,18 @@ public class Background
         PatchController.unlockPopupBackgroundName = info.name;
         UIController.instance.ShowUnlockPopup(PatchController.VANILLA_POPUP_ID);
         PatchController.unlockPopupBackgroundName = "";
+    }
+
+    /// <summary>
+    /// Unlock the background when the corresponding flag is set to true
+    /// </summary>
+    protected void OnFlagChange(string flagId)
+    {
+        if (flagId != info.acquisitionFlag)
+            return;
+        if (Core.Events.GetFlag(flagId) == false)
+            return;
+
+        SetUnlocked(true);
     }
 }

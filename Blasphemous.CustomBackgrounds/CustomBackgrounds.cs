@@ -1,6 +1,7 @@
 ﻿using Blasphemous.CheatConsole;
 using Blasphemous.CustomBackgrounds.Commands;
 using Blasphemous.CustomBackgrounds.Components.Backgrounds;
+using Blasphemous.CustomBackgrounds.Events;
 using Blasphemous.CustomBackgrounds.Extensions;
 using Blasphemous.ModdingAPI;
 using Blasphemous.ModdingAPI.Helpers;
@@ -17,6 +18,7 @@ public class CustomBackgrounds : BlasMod
     private int _backgroundIndex;
     private static readonly string _saveFileName = @"BackgroundSaveData.json";
 
+    internal EventHandler EventHandler { get; } = new();
     internal List<Background> UnlockedBackgrounds => BackgroundRegister.Backgrounds.Where(x => x.isUnlocked == true).ToList();
     internal int BackgroundIndex
     {

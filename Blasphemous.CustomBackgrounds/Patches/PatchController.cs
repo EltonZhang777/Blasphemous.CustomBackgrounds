@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Blasphemous.CustomBackgrounds.Patches;
 
+/// <summary>
+/// Contains static variables and functions that assists Harmony patches
+/// </summary>
 internal static class PatchController
 {
     internal static string unlockPopupBackgroundName = "";
