@@ -11,7 +11,7 @@ public class BackgroundSaveData
     /// <summary>
     /// Currently displayed mod background's name.
     /// </summary>
-    public string currentModBackground = "";
+    public string currentModMainMenuBg = "";
 
     /// <summary>
     /// List of unlocked mod backgrounds' names.
@@ -19,5 +19,5 @@ public class BackgroundSaveData
     public List<string> unlockedBackgrounds = new();
 
     [JsonIgnore]
-    internal bool currentIsModBackground => !string.IsNullOrEmpty(currentModBackground);
+    internal bool currentIsModMainMenuBg => !string.IsNullOrEmpty(currentModMainMenuBg);
 }

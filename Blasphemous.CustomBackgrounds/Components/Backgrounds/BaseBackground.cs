@@ -1,6 +1,5 @@
 ﻿using Blasphemous.CustomBackgrounds.Components.Animations;
 using Blasphemous.CustomBackgrounds.Components.Sprites;
-using Blasphemous.CustomBackgrounds.Extensions;
 using Blasphemous.CustomBackgrounds.Patches;
 using Blasphemous.ModdingAPI;
 using Blasphemous.ModdingAPI.Files;
@@ -14,37 +13,38 @@ using UnityEngine.UI;
 namespace Blasphemous.CustomBackgrounds.Components.Backgrounds;
 
 /// <summary>
-/// Custom main menu background object
+/// Abstract class of background visual elements.
 /// </summary>
-public class Background
+public abstract class BaseBackground
 {
     /// <summary>
     /// The mod that registered the background.
     /// </summary>
     public string parentModId;
 
-    internal BackgroundInfo info;
+    protected GameObject gameObj;
+    protected Vector2 spriteSize;
+    protected readonly AnimationInfo animationInfo;
+    protected readonly Sprite sprite;
+    protected static readonly float UI_WIDTH = 640f;
+    protected static readonly float UI_HEIGHT = 360f;
     internal bool isUnlocked = false;
-    private GameObject _gameObj;
-    private Vector2 _spriteSize;
-    private readonly AnimationInfo _animationInfo;
-    private readonly Sprite _sprite;
-    private static readonly float UI_WIDTH = 640f;
-    private static readonly float UI_HEIGHT = 360f;
+    internal readonly BackgroundInfo info;
 
+    protected abstract bool ShouldShowPopup { get; }
     internal GameObject GameObj
     {
         get
         {
-            if (_gameObj == null)
+            if (gameObj == null)
             {
                 InitializeGameObject();
             }
-            return _gameObj;
+            return gameObj;
         }
         set
         {
-            _gameObj = value;
+            gameObj = value;
         }
     }
     internal string LocalizedName
@@ -78,12 +78,7 @@ public class Background
     }
     internal string ColoredLocalizedName => Main.ColorString(LocalizedName, info.textColor);
 
-    /// <summary>
-    /// Constructor for custom background object
-    /// </summary>
-    /// <param name="fileHandler">The registering mod's FileHandler</param>
-    /// <param name="backgroundInfo">Deserialized info object</param>
-    public Background(
+    internal BaseBackground(
         FileHandler fileHandler,
         BackgroundInfo backgroundInfo)
     {
@@ -91,18 +86,18 @@ public class Background
         switch (backgroundInfo.spriteType)
         {
             case BackgroundInfo.SpriteType.Static:
-                if (!TryImportSprite(fileHandler, backgroundInfo.spriteImportInfo, out _sprite))
+                if (!TryImportSprite(fileHandler, backgroundInfo.spriteImportInfo, out sprite))
                 {
                     throw new ArgumentException($"Failed loading static background `{backgroundInfo.name}`!");
                 }
-                _spriteSize = _sprite.rect.size;
+                spriteSize = sprite.rect.size;
                 break;
             case BackgroundInfo.SpriteType.Animated:
-                if (!TryImportAnimation(fileHandler, backgroundInfo.animationImportInfo, out _animationInfo))
+                if (!TryImportAnimation(fileHandler, backgroundInfo.animationImportInfo, out animationInfo))
                 {
                     throw new ArgumentException($"Failed loading animated background `{backgroundInfo.name}`!");
                 }
-                _spriteSize = new Vector2(backgroundInfo.animationImportInfo.Width, backgroundInfo.animationImportInfo.Height);
+                spriteSize = new Vector2(backgroundInfo.animationImportInfo.Width, backgroundInfo.animationImportInfo.Height);
                 break;
         }
 
@@ -117,47 +112,34 @@ public class Background
                 Main.CustomBackgrounds.EventHandler.OnFlagChange += OnFlagChange;
             }
         }
-
     }
 
-    /// <summary>
-    /// Recommended constructor for custom background object. Handles JSON deserialization on its own.
-    /// </summary>
-    /// <param name="fileHandler">The registering mod's FileHandler</param>
-    /// <param name="backgroundInfoJsonFileLocation">JSON file location of `backgroundInfo`</param>
-    public Background(
-        FileHandler fileHandler,
-        string backgroundInfoJsonFileLocation)
-        : this(fileHandler, fileHandler.LoadDataAsJson<BackgroundInfo>(backgroundInfoJsonFileLocation))
-    { }
-
-    internal void InitializeGameObject()
+    internal virtual void InitializeGameObject()
     {
-        _gameObj = new GameObject($"Background[{info.name}]");
-        _gameObj.transform.position = new Vector3(0f, 0f, 99f);
-        _gameObj.layer = LayerMask.NameToLayer("UI");
+        gameObj = new GameObject($"Background[{info.name}]");
+        gameObj.transform.position = new Vector3(0f, 0f, 99f);
+        gameObj.layer = LayerMask.NameToLayer("UI");
 
         // set RectTransform
-        RectTransform rectTransform = _gameObj.AddComponent<RectTransform>();
+        RectTransform rectTransform = gameObj.AddComponent<RectTransform>();
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0, 0);
 
         // set Image component
-        Image image = _gameObj.AddComponent<Image>();
+        Image image = gameObj.AddComponent<Image>();
         image.raycastTarget = true;
-        image.preserveAspect = true;
         image.type = Image.Type.Simple;
 
         // add sprite/animation to Image
         switch (info.spriteType)
         {
             case BackgroundInfo.SpriteType.Static:
-                image.sprite = _sprite;
+                image.sprite = sprite;
                 break;
             case BackgroundInfo.SpriteType.Animated:
-                ModImageAnimator anim = _gameObj.AddComponent<ModImageAnimator>();
-                anim.Animation = _animationInfo;
+                ModImageAnimator anim = gameObj.AddComponent<ModImageAnimator>();
+                anim.Animation = animationInfo;
                 break;
             default:
                 throw new NotImplementedException();
@@ -172,32 +154,24 @@ public class Background
                 break;
             case BackgroundInfo.FitType.KeepRatioFillScreen:
                 image.preserveAspect = true;
-                rectTransform.sizeDelta = (_spriteSize.x / _spriteSize.y) > (UI_WIDTH / UI_HEIGHT)
-                    ? _spriteSize / (_spriteSize.y / UI_HEIGHT)
-                    : _spriteSize / (_spriteSize.x / UI_WIDTH);
+                rectTransform.sizeDelta = (spriteSize.x / spriteSize.y) > (UI_WIDTH / UI_HEIGHT)
+                    ? spriteSize / (spriteSize.y / UI_HEIGHT)
+                    : spriteSize / (spriteSize.x / UI_WIDTH);
                 break;
             case BackgroundInfo.FitType.KeepRatioFitScreen:
                 image.preserveAspect = true;
-                rectTransform.sizeDelta = (_spriteSize.x / _spriteSize.y) > (UI_WIDTH / UI_HEIGHT)
-                    ? _spriteSize / (_spriteSize.x / UI_WIDTH)
-                    : _spriteSize / (_spriteSize.y / UI_HEIGHT);
+                rectTransform.sizeDelta = (spriteSize.x / spriteSize.y) > (UI_WIDTH / UI_HEIGHT)
+                    ? spriteSize / (spriteSize.x / UI_WIDTH)
+                    : spriteSize / (spriteSize.y / UI_HEIGHT);
                 break;
             default:
                 throw new NotImplementedException();
         }
         rectTransform.localPosition = rectTransform.sizeDelta / -2f;
-        _gameObj.SetActive(false);
+        gameObj.SetActive(false);
     }
 
-    internal void SetGameObjectLayer()
-    {
-        Transform targetTransform = GameObject.Find($"Game UI/Content/UI_MAINMENU/Menu").transform;
-        _gameObj.transform.SetParent(targetTransform, false);
-        int index = GameObject.Find($"Game UI/Content/UI_MAINMENU/Menu/StaticBackground").transform.GetSiblingIndex();
-        _gameObj.transform.SetSiblingIndex(index + 1);
-    }
-
-    internal bool TryImportAnimation(
+    protected internal virtual bool TryImportAnimation(
         FileHandler fileHandler,
         AnimationImportInfo importInfo,
         out AnimationInfo animationInfo)
@@ -218,7 +192,7 @@ public class Background
         return true;
     }
 
-    internal bool TryImportSprite(
+    protected internal virtual bool TryImportSprite(
         FileHandler fileHandler,
         SpriteImportInfo importInfo,
         out Sprite sprite)
@@ -241,27 +215,29 @@ public class Background
     /// <summary>
     /// Set background unlocked state. If unlocking from locked state, trigger a pop-up window.
     /// </summary>
-    public void SetUnlocked(bool unlocked, bool showPopUp = true)
+    public virtual void SetUnlocked(bool unlocked, bool showPopUp = true)
     {
         if ((isUnlocked == false) && (unlocked == true))
         {
-            if (showPopUp)
+            if (showPopUp && ShouldShowPopup)
                 ShowUnlockPopUp();
         }
         isUnlocked = unlocked;
     }
 
-    internal void ShowUnlockPopUp()
+    protected internal virtual void ShowUnlockPopUp()
     {
         PatchController.unlockPopupBackgroundName = info.name;
         UIController.instance.ShowUnlockPopup(PatchController.VANILLA_POPUP_ID);
         PatchController.unlockPopupBackgroundName = "";
     }
 
+    protected internal abstract void SetGameObjectLayer();
+
     /// <summary>
     /// Unlock the background when the corresponding flag is set to true
     /// </summary>
-    protected void OnFlagChange(string flagId)
+    protected virtual void OnFlagChange(string flagId)
     {
         if (flagId != info.acquisitionFlag)
             return;

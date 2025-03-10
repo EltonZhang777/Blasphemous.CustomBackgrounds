@@ -8,7 +8,6 @@ namespace Blasphemous.CustomBackgrounds.Components.Backgrounds;
 
 public class BackgroundInfo
 {
-
     /// <summary>
     /// The code name of the background.
     /// </summary>

@@ -9,13 +9,16 @@ namespace Blasphemous.CustomBackgrounds.Components.Backgrounds;
 /// </summary>
 public static class BackgroundRegister
 {
+    private static readonly List<BaseBackground> _backgrounds = new();
+    internal static IEnumerable<BaseBackground> Backgrounds => _backgrounds;
+    internal static IEnumerable<MainMenuBackground> MainMenuBackgrounds => _backgrounds.OfType<MainMenuBackground>();
+    internal static int Total => _backgrounds.Count;
 
-    private static readonly List<Background> _backgrounds = new();
-    internal static IEnumerable<Background> Backgrounds => _backgrounds;
-    internal static Background AtIndex(int index) => _backgrounds[index];
-    internal static Background AtName(string name)
+    internal static BaseBackground AtIndex(int index) => _backgrounds[index];
+
+    internal static BaseBackground AtName(string name)
     {
-        Background result = Exists(name)
+        BaseBackground result = Exists(name)
             ? _backgrounds.First(x => x.info.name == name)
             : null;
         if (result == null)
@@ -24,15 +27,27 @@ public static class BackgroundRegister
         }
         return result;
     }
+
     internal static bool Exists(string name) => _backgrounds.Any(x => x.info.name == name);
-    internal static int Total => _backgrounds.Count;
+    internal static bool Exists(string name, bool unlocked) => _backgrounds.Any(x => (x.info.name == name) && (x.isUnlocked == unlocked));
+    internal static bool Exists<T>(string name) where T : BaseBackground => _backgrounds.OfType<T>().Any(x => x.info.name == name);
+    internal static bool Exists<T>(string name, bool unlocked) where T : BaseBackground => _backgrounds.OfType<T>().Any(x => (x.info.name == name) && (x.isUnlocked == unlocked));
+    internal static IEnumerable<T> OfType<T>(this IEnumerable<BaseBackground> collection) where T : BaseBackground
+    {
+        return collection.Where(x => x is T)?.Select(x => x as T);
+    }
+
+    internal static IEnumerable<T> SelectUnlocked<T>(this IEnumerable<T> collection, bool unlocked) where T : BaseBackground
+    {
+        return collection.Where(x => x.isUnlocked == unlocked);
+    }
 
     /// <summary>
     /// Registers a new background 
     /// </summary>
     public static void RegisterBackground(
         this ModServiceProvider provider,
-        Background background)
+        BaseBackground background)
     {
         if (provider == null)
             return;

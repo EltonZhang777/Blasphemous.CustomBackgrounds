@@ -21,6 +21,7 @@ internal class BackgroundCommand : ModCommand
             { "list", SubCommand_List },
             { "unlock", SubCommand_Unlock },
             { "lock", SubCommand_Lock },
+            { "use", SubCommand_Use }
         };
 #if DEBUG
         result.Add("showpopup", SubCommand_ShowPopUp);
@@ -39,6 +40,7 @@ internal class BackgroundCommand : ModCommand
         Write($"{CommandName} list [unlocked/locked] : list all unlocked/locked backgrounds");
         Write($"{CommandName} unlock [patchName] : unlock the specified background");
         Write($"{CommandName} lock [patchName] : lock the specified background");
+        Write($"{CommandName} use [patchName] : use the specified background after returning to main menu. (does not work when executed in main menu)");
 #if DEBUG
         Write($"{CommandName} showpopup [patchName] : (debug use) show the unlock popup of specified background");
 #endif
@@ -53,7 +55,7 @@ internal class BackgroundCommand : ModCommand
         if (parameters.Length == 0)
         {
             Write($"All loaded backgrounds: ");
-            foreach (Background background in BackgroundRegister.Backgrounds)
+            foreach (BaseBackground background in BackgroundRegister.Backgrounds)
             {
                 hasAny = true;
                 string unlockState = background.isUnlocked ? "unlocked" : "locked";
@@ -69,7 +71,7 @@ internal class BackgroundCommand : ModCommand
             if (parameters[0].Equals("unlocked"))
             {
                 Write($"All unlocked backgrounds: ");
-                foreach (Background background in BackgroundRegister.Backgrounds.Where(x => x.isUnlocked == true))
+                foreach (BaseBackground background in BackgroundRegister.Backgrounds.Where(x => x.isUnlocked == true))
                 {
                     hasAny = true;
                     Write($"  {background.info.name}");
@@ -82,7 +84,7 @@ internal class BackgroundCommand : ModCommand
             else if (parameters[0].Equals("locked"))
             {
                 Write($"All locked backgrounds: ");
-                foreach (Background background in BackgroundRegister.Backgrounds.Where(x => x.isUnlocked == false))
+                foreach (BaseBackground background in BackgroundRegister.Backgrounds.Where(x => x.isUnlocked == false))
                 {
                     hasAny = true;
                     Write($"  {background.info.name}");
@@ -101,10 +103,10 @@ internal class BackgroundCommand : ModCommand
             return;
 
         string backgroundName = parameters[0];
-        if (!EnsureBackgroundExists(backgroundName))
+        if (!BackgroundExists(backgroundName))
             return;
 
-        Background targetBackground = BackgroundRegister.Backgrounds.First(x => x.info.name.Equals(backgroundName));
+        BaseBackground targetBackground = BackgroundRegister.Backgrounds.First(x => x.info.name.Equals(backgroundName));
         targetBackground.SetUnlocked(true);
     }
 
@@ -114,10 +116,10 @@ internal class BackgroundCommand : ModCommand
             return;
 
         string backgroundName = parameters[0];
-        if (!EnsureBackgroundExists(backgroundName))
+        if (!BackgroundExists(backgroundName))
             return;
 
-        Background targetBackground = BackgroundRegister.Backgrounds.First(x => x.info.name.Equals(backgroundName));
+        BaseBackground targetBackground = BackgroundRegister.Backgrounds.First(x => x.info.name.Equals(backgroundName));
         targetBackground.SetUnlocked(false);
     }
 
@@ -127,11 +129,28 @@ internal class BackgroundCommand : ModCommand
             return;
 
         string backgroundName = parameters[0];
-        if (!EnsureBackgroundExists(backgroundName))
+        if (!BackgroundExists(backgroundName))
             return;
 
-        Background targetBackground = BackgroundRegister.Backgrounds.First(x => x.info.name.Equals(backgroundName));
+        BaseBackground targetBackground = BackgroundRegister.Backgrounds.First(x => x.info.name.Equals(backgroundName));
         targetBackground.ShowUnlockPopUp();
+    }
+
+    private void SubCommand_Use(string[] parameters)
+    {
+        if (!ValidateParameterList(parameters, 1))
+            return;
+
+        string backgroundName = parameters[0];
+        if (!BackgroundExists(backgroundName))
+            return;
+
+        BaseBackground targetBackground = BackgroundRegister.Backgrounds.First(x => x.info.name.Equals(backgroundName));
+        if (targetBackground is MainMenuBackground)
+        {
+            Main.CustomBackgrounds.backgroundSaveData.currentModMainMenuBg = targetBackground.info.name;
+        }
+        // WIP for other types of backgrounds
     }
 
     private bool ValidateParameterList(string[] parameters, List<int> validParameterLengths)
@@ -155,11 +174,11 @@ internal class BackgroundCommand : ModCommand
         return true;
     }
 
-    private bool EnsureBackgroundExists(string name)
+    private bool BackgroundExists(string name)
     {
         if (!BackgroundRegister.Exists(name))
         {
-            Write($"Patch `{name}` not found!");
+            Write($"Background `{name}` not found!");
             return false;
         }
         return true;

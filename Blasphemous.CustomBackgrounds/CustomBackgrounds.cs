@@ -15,17 +15,18 @@ public class CustomBackgrounds : BlasMod
 {
     internal Config config;
     internal BackgroundSaveData backgroundSaveData = new();
-    private int _backgroundIndex;
+    private int _mainMenuBgIndex;
     private static readonly string _saveFileName = @"BackgroundSaveData.json";
 
     internal EventHandler EventHandler { get; } = new();
-    internal List<Background> UnlockedBackgrounds => BackgroundRegister.Backgrounds.Where(x => x.isUnlocked == true).ToList();
-    internal int BackgroundIndex
+    internal List<BaseBackground> UnlockedBackgrounds => BackgroundRegister.Backgrounds.SelectUnlocked(true).ToList();
+    internal List<MainMenuBackground> UnlockedMainMenuBackgrounds => BackgroundRegister.MainMenuBackgrounds.SelectUnlocked(true).ToList();
+    internal int MainMenuBgIndex
     {
-        get => _backgroundIndex;
+        get => _mainMenuBgIndex;
         set
         {
-            int numTotalBackgrounds = UnlockedBackgrounds.Count + 4;
+            int numTotalBackgrounds = UnlockedMainMenuBackgrounds.Count + 4;
             if (value < 0)
             {
                 do
@@ -41,29 +42,29 @@ public class CustomBackgrounds : BlasMod
                 } while (value >= numTotalBackgrounds);
             }
 
-            _backgroundIndex = value;
+            _mainMenuBgIndex = value;
         }
     }
-    internal int ModBackgroundIndex
+    internal int ModMainMenuBgIndex
     {
         get
         {
-            if (!IsDisplayingModBackground)
+            if (!IsDisplayingModMainMenuBg)
                 throw new System.Exception($"Failed attempt to call mod background by index when displaying vanilla background!");
 
-            return BackgroundIndex - 4;
+            return MainMenuBgIndex - 4;
         }
     }
-    internal bool IsDisplayingModBackground
+    internal bool IsDisplayingModMainMenuBg
     {
         get
         {
-            return !(BackgroundIndex >= 0 && BackgroundIndex <= 3);
+            return !(MainMenuBgIndex >= 0 && MainMenuBgIndex <= 3);
         }
     }
-    internal bool IsDisplayingVanillaBackground
+    internal bool IsDisplayingVanillaMainMenuBg
     {
-        get => !IsDisplayingModBackground;
+        get => !IsDisplayingModMainMenuBg;
     }
 
     internal CustomBackgrounds() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION) { }
@@ -78,8 +79,8 @@ public class CustomBackgrounds : BlasMod
     protected override void OnRegisterServices(ModServiceProvider provider)
     {
 #if DEBUG
-        provider.RegisterBackground(new Background(FileHandler, "test_background_static.json"));
-        provider.RegisterBackground(new Background(FileHandler, "test_background_animated.json"));
+        provider.RegisterBackground(new MainMenuBackground(FileHandler, "test_background_static.json"));
+        provider.RegisterBackground(new MainMenuBackground(FileHandler, "test_background_animated.json"));
 #endif
         provider.RegisterCommand(new BackgroundCommand());
     }
@@ -90,7 +91,7 @@ public class CustomBackgrounds : BlasMod
         LoadBackgroundSave();
 
         // show pop-up for auto-acquired backgrounds that aren't unlocked yet
-        foreach (Background background in BackgroundRegister.Backgrounds.Where(x => x.info.acquisitionType == BackgroundInfo.AcquisitionType.OnInitialize))
+        foreach (BaseBackground background in BackgroundRegister.Backgrounds.Where(x => x.info.acquisitionType == BackgroundInfo.AcquisitionType.OnInitialize))
         {
             background.SetUnlocked(true);
         }
@@ -103,26 +104,26 @@ public class CustomBackgrounds : BlasMod
         if (SceneHelper.GameSceneLoaded)
         {
             // if displaying a mod background, store the currently displayed background's name
-            backgroundSaveData.currentModBackground = IsDisplayingModBackground
-                ? UnlockedBackgrounds[ModBackgroundIndex].info.name
+            backgroundSaveData.currentModMainMenuBg = IsDisplayingModMainMenuBg
+                ? UnlockedMainMenuBackgrounds[ModMainMenuBgIndex].info.name
                 : "";
         }
         else if (SceneHelper.MenuSceneLoaded)
         {
-            if (backgroundSaveData.currentIsModBackground)
+            if (backgroundSaveData.currentIsModMainMenuBg)
             {
                 // restore displayed mod background according to name (because index may be changed by newly unlocked backgrounds)
-                if (!BackgroundRegister.Exists(backgroundSaveData.currentModBackground))
+                if (!BackgroundRegister.Exists(backgroundSaveData.currentModMainMenuBg))
                 {
                     ModLog.Warn($"Saved background does not exist! Defaulting background to `Blasphemous`.");
                     //BackgroundIndex = 0;
                 }
                 else
                 {
-                    int index = UnlockedBackgrounds.IndexOf(UnlockedBackgrounds.First(x => x.info.name == backgroundSaveData.currentModBackground));
-                    UnlockedBackgrounds[ModBackgroundIndex].GameObj.SetActive(false);
-                    BackgroundIndex = index + 4;
-                    UnlockedBackgrounds[ModBackgroundIndex].GameObj.SetActive(true);
+                    int index = UnlockedMainMenuBackgrounds.IndexOf(UnlockedMainMenuBackgrounds.First(x => x.info.name == backgroundSaveData.currentModMainMenuBg));
+                    UnlockedMainMenuBackgrounds[ModMainMenuBgIndex].GameObj.SetActive(false);
+                    MainMenuBgIndex = index + 4;
+                    UnlockedMainMenuBackgrounds[ModMainMenuBgIndex].GameObj.SetActive(true);
                 }
             }
 #if DEBUG
@@ -133,9 +134,9 @@ public class CustomBackgrounds : BlasMod
                 sb.AppendLine($"#{i}: {BackgroundRegister.AtIndex(i).info.name} [unlocked?: {BackgroundRegister.AtIndex(i).isUnlocked}]");
             }
             sb.AppendLine($"\nAll unlocked backgrounds:");
-            for (int i = 0; i < UnlockedBackgrounds.Count; i++)
+            for (int i = 0; i < UnlockedMainMenuBackgrounds.Count; i++)
             {
-                sb.AppendLine($"#{i}: {UnlockedBackgrounds[i].info.name}");
+                sb.AppendLine($"#{i}: {UnlockedMainMenuBackgrounds[i].info.name}");
             }
             ModLog.Info(sb);
 #endif
@@ -144,8 +145,8 @@ public class CustomBackgrounds : BlasMod
 
     protected override void OnDispose()
     {
-        backgroundSaveData.currentModBackground = IsDisplayingModBackground
-            ? UnlockedBackgrounds[ModBackgroundIndex].info.name
+        backgroundSaveData.currentModMainMenuBg = IsDisplayingModMainMenuBg
+            ? UnlockedMainMenuBackgrounds[ModMainMenuBgIndex].info.name
             : "";
         SaveBackgroundSave();
         ConfigHandler.Save(config);
@@ -184,7 +185,7 @@ public class CustomBackgrounds : BlasMod
 
     internal void SaveBackgroundSave()
     {
-        backgroundSaveData.unlockedBackgrounds = UnlockedBackgrounds.Select(x => x.info.name).ToList();
+        backgroundSaveData.unlockedBackgrounds = UnlockedMainMenuBackgrounds.Select(x => x.info.name).ToList();
         FileHandler.WriteJsonToContent(_saveFileName, backgroundSaveData);
     }
 }

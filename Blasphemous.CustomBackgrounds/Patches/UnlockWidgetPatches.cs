@@ -17,7 +17,7 @@ class UnlockWidget_Configurate_ConfigurateBackgroundUnlockWidget_Patch
     {
         if (PatchController.IsShowingModPopup)
         {
-            Background background = BackgroundRegister.AtName(PatchController.unlockPopupBackgroundName);
+            BaseBackground background = BackgroundRegister.AtName(PatchController.unlockPopupBackgroundName);
             ___skinPreviewImage.sprite = background.GameObj.GetComponent<Image>().sprite;
             return false;
         }
@@ -41,7 +41,7 @@ class UnlockWidget_UpdateTextPro_UpdateModBackgroundLocalization_Patch
     {
         if (PatchController.IsShowingModPopup)
         {
-            Background background = BackgroundRegister.AtName(PatchController.unlockPopupBackgroundName);
+            BaseBackground background = BackgroundRegister.AtName(PatchController.unlockPopupBackgroundName);
             Text titleText = __instance.transform.Find("RootObject/Frame/Title").gameObject.GetComponent<Text>();
             TextMeshProUGUI bodyText = __instance.transform.Find("RootObject/Frame/Text").gameObject.GetComponent<TextMeshProUGUI>();
             titleText.text = PatchController.Localizer.LocalizedPopupTitle;
