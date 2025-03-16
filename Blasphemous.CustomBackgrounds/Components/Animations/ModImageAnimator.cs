@@ -3,13 +3,13 @@ using UnityEngine.UI;
 
 namespace Blasphemous.CustomBackgrounds.Components.Animations;
 
-[RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(Image))]
 public class ModImageAnimator : MonoBehaviour
 {
     private AnimationInfo _animation;
     private float _nextUpdateTime;
     private int _currentIdx;
-    private Image image;
+    internal Image image;
 
     public AnimationInfo Animation
     {

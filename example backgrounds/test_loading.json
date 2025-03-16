@@ -1,10 +1,10 @@
 {
-	"name": "smeel",
-	"textColor": "#00e600",
+	"name": "smeel_loading",
 	"fileName": "test_animation.png",
+	"activeFlag": "test_death_active",
+	"disableVanillaLoadingIcon": false,
 	"localization": {
-		"en": "Smeeling thru the pain",
-		"zh": "微啸面对危险"
+		"en": "smeel loading"
 	},
 	"spriteType": "Animated",
 	"fitType": "FitScreenRatio",
