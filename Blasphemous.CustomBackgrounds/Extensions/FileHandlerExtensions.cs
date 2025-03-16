@@ -1,12 +1,24 @@
 ﻿using Blasphemous.ModdingAPI.Files;
+using HarmonyLib;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace Blasphemous.CustomBackgrounds.Extensions;
 
 internal static class FileHandlerExtensions
 {
+    internal static string GetDataPath(this FileHandler fileHandler)
+    {
+        return Traverse.Create(fileHandler).Field("dataPath").GetValue<string>();
+    }
+
+    internal static string[] GetAllDataFileNames(this FileHandler fileHandler)
+    {
+        return Directory.GetFiles(fileHandler.GetDataPath()).Select(x => Path.GetFileName(x)).ToArray();
+    }
+
     internal static T LoadDataAsJson<T>(this FileHandler fileHandler, string fileName)
     {
         if (!fileHandler.LoadDataAsJson(fileName, out T result))

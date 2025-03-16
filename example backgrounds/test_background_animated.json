@@ -1,0 +1,17 @@
+{
+	"name": "smeel",
+	"textColor": "#00e600",
+	"fileName": "test_animation.png",
+	"localization": {
+		"en": "Smeeling thru the pain",
+		"zh": "微啸面对危险"
+	},
+	"spriteType": "Animated",
+	"fitType": "FitScreenRatio",
+	"acquisitionType": "OnInitialize",
+	"animationImportInfo": {
+		"Width": 1920,
+		"Height": 1080,
+		"SecondsPerFrame": 0.03333
+	}
+}

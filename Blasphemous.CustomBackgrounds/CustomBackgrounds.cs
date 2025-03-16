@@ -79,13 +79,13 @@ public class CustomBackgrounds : BlasMod
 
     protected override void OnRegisterServices(ModServiceProvider provider)
     {
+        provider.RegisterCommand(new BackgroundCommand());
 #if DEBUG
         provider.RegisterBackground(new MainMenuBackground(FileHandler, "test_background_static.json"));
         provider.RegisterBackground(new MainMenuBackground(FileHandler, "test_background_animated.json"));
         provider.RegisterBackground(new DeathBackground(FileHandler, "test_death.json"));
         provider.RegisterBackground(new LoadingBackground(FileHandler, "test_loading.json"));
 #endif
-        provider.RegisterCommand(new BackgroundCommand());
     }
 
     protected override void OnAllInitialized()

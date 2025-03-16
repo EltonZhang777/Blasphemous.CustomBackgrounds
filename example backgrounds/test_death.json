@@ -1,0 +1,15 @@
+{
+	"name": "git_gud",
+	"fileName": "git_gud.png",
+	"activeFlag": "test_death_active",
+	"localization": {
+		"en": "Git Gud",
+		"zh": "菜就多练"
+	},
+	"spriteType": "Static",
+	"fitType": "FitScreenRatio",
+	"acquisitionType": "OnInitialize",
+	"spriteImportInfo": {
+        "PixelsPerUnit": 12
+	}
+}
