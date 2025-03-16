@@ -1,6 +1,11 @@
-﻿using Framework.Managers;
+﻿using Blasphemous.CustomBackgrounds.Components.Backgrounds;
+using Framework.Managers;
+using Gameplay.UI;
+using HarmonyLib;
 using I2.Loc;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Blasphemous.CustomBackgrounds.Patches;
 
@@ -13,6 +18,36 @@ internal static class PatchController
     internal static readonly string VANILLA_POPUP_ID = "PENITENT_ALMS";
 
     internal static bool IsShowingModPopup => !string.IsNullOrEmpty(unlockPopupBackgroundName);
+
+    /// <summary>
+    /// Activate/Deactivate the vanilla counterpart of the given type of background
+    /// </summary>
+    internal static void SetVanillaCounterpartActive<T>(bool active) where T : BaseBackground
+    {
+        if (typeof(T) == typeof(DeathBackground))
+        {
+            GameObject obj = GameObject.Find($"Game UI/Content/UI_DEAD_SCREEN/Main Interface/DeathMessage");
+            obj.SetActive(active);
+            obj = GameObject.Find($"Game UI/Content/UI_DEAD_SCREEN/Main Interface/Background");
+            obj.SetActive(active);
+        }
+        else if (typeof(T) == typeof(MainMenuBackground))
+        {
+            GameObject obj = GameObject.Find($"Game UI/Content/UI_MAINMENU/Menu/StaticBackground");
+            obj.SetActive(active);
+            obj = GameObject.Find($"Game UI/Content/UI_MAINMENU/Menu/AnimatedBackgroundRoot");
+            obj.SetActive(active);
+        }
+        else if (typeof(T) == typeof(LoadingBackground))
+        {
+            GameObject vanillaLoadingScreen = Traverse.Create(UIController.instance).Field("loadWidget").GetValue<GameObject>();
+            vanillaLoadingScreen.SetActive(false);
+        }
+        else
+        {
+            throw new NotImplementedException();
+        }
+    }
 
     internal static class Localizer
     {

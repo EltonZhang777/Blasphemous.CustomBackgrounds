@@ -6,7 +6,10 @@ using System.Collections.Generic;
 
 namespace Blasphemous.CustomBackgrounds.Components.Backgrounds;
 
-public class BackgroundInfo
+/// <summary>
+/// Serializable class containing information of background import settings
+/// </summary>
+public class BaseBackgroundInfo
 {
     /// <summary>
     /// The code name of the background.
@@ -16,7 +19,7 @@ public class BackgroundInfo
     /// <summary>
     /// The color of the name text when displayed in pop-up or selection tab, in HTML color string format `#RRGGBB`
     /// </summary>
-    public string textColor;
+    public string textColor = "#9C4E4E";
 
     /// <summary>
     /// File name of the sprite picture in `data` folder

@@ -21,7 +21,7 @@ class NewMainMenu_ProcessMoveInput_IndexExtension_Patch
         Text ___backgroundLabel)
     {
         // disable all mod backgrounds
-        BackgroundRegister.Backgrounds.ToList().ForEach(x => x.GameObj.SetActive(false));
+        BackgroundRegister.Backgrounds.ToList().ForEach(x => x.SetActive(false));
 
         // if the index after moving will be pointing to a vanilla background, return to executing original method instead
         Main.CustomBackgrounds.MainMenuBgIndex += movingRight ? 1 : -1;
@@ -32,7 +32,7 @@ class NewMainMenu_ProcessMoveInput_IndexExtension_Patch
                 __instance.bgIndex = 4;
             if (Main.CustomBackgrounds.MainMenuBgIndex == 0 && __instance.bgIndex == 0)
                 __instance.bgIndex = -1;
-            SetVanillaBackgroundActive(true);
+            PatchController.SetVanillaCounterpartActive<MainMenuBackground>(true);
             return true;
         }
 
@@ -43,20 +43,13 @@ class NewMainMenu_ProcessMoveInput_IndexExtension_Patch
         }
 
         // enable mod background and disable vanilla background
-        SetVanillaBackgroundActive(false);
-        Main.CustomBackgrounds.UnlockedMainMenuBackgrounds[Main.CustomBackgrounds.ModMainMenuBgIndex].GameObj.SetActive(true);
-        Main.CustomBackgrounds.UnlockedMainMenuBackgrounds[Main.CustomBackgrounds.ModMainMenuBgIndex].SetGameObjectLayer();
+        PatchController.SetVanillaCounterpartActive<MainMenuBackground>(false);
+        Main.CustomBackgrounds.UnlockedMainMenuBackgrounds[Main.CustomBackgrounds.ModMainMenuBgIndex].SetActive(true);
 
         // update background selection's displayed label text
         ___backgroundLabel.text = Main.CustomBackgrounds.UnlockedMainMenuBackgrounds[Main.CustomBackgrounds.ModMainMenuBgIndex].ColoredLocalizedName;
 
         return false;
-
-        void SetVanillaBackgroundActive(bool active)
-        {
-            __instance.transform.Find("Menu/StaticBackground").gameObject.SetActive(active);
-            __instance.transform.Find("Menu/AnimatedBackgroundRoot").gameObject.SetActive(active);
-        }
     }
 }
 
@@ -89,15 +82,8 @@ class NewMainMenu_Awake_UpdateBackgroundIndexToModIndex_Patch
             ModLog.Warn($"Main.CustomBackgrounds.BackgroundIndex: {Main.CustomBackgrounds.MainMenuBgIndex}");
 #endif
             // enable mod background and disable vanilla background
-            SetVanillaBackgroundActive(false);
-            Main.CustomBackgrounds.UnlockedMainMenuBackgrounds[Main.CustomBackgrounds.ModMainMenuBgIndex].GameObj.SetActive(true);
-            Main.CustomBackgrounds.UnlockedMainMenuBackgrounds[Main.CustomBackgrounds.ModMainMenuBgIndex].SetGameObjectLayer();
-        }
-
-        void SetVanillaBackgroundActive(bool active)
-        {
-            __instance.transform.Find("Menu/StaticBackground").gameObject.SetActive(active);
-            __instance.transform.Find("Menu/AnimatedBackgroundRoot").gameObject.SetActive(active);
+            PatchController.SetVanillaCounterpartActive<MainMenuBackground>(false);
+            Main.CustomBackgrounds.UnlockedMainMenuBackgrounds[Main.CustomBackgrounds.ModMainMenuBgIndex].SetActive(true);
         }
     }
 }

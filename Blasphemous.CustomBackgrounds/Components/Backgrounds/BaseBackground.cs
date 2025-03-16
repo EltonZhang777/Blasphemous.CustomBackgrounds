@@ -1,5 +1,6 @@
 ﻿using Blasphemous.CustomBackgrounds.Components.Animations;
 using Blasphemous.CustomBackgrounds.Components.Sprites;
+using Blasphemous.CustomBackgrounds.Extensions;
 using Blasphemous.CustomBackgrounds.Patches;
 using Blasphemous.ModdingAPI;
 using Blasphemous.ModdingAPI.Files;
@@ -29,10 +30,17 @@ public abstract class BaseBackground
     protected static readonly float UI_WIDTH = 640f;
     protected static readonly float UI_HEIGHT = 360f;
     internal bool isUnlocked = false;
-    internal readonly BackgroundInfo info;
+    internal readonly BaseBackgroundInfo info;
 
+    /// <summary>
+    /// Whether a pop-up should be shown when unlocking this background
+    /// </summary>
     protected abstract bool ShouldShowPopup { get; }
-    internal GameObject GameObj
+
+    /// <summary>
+    /// Accessor of <see cref="gameObj"/> that auto-initializes it when it's null (newly-initialized GameObj is disabled by default)
+    /// </summary>
+    protected internal GameObject GameObj
     {
         get
         {
@@ -78,21 +86,26 @@ public abstract class BaseBackground
     }
     internal string ColoredLocalizedName => Main.ColorString(LocalizedName, info.textColor);
 
+    /// <summary>
+    /// Basic constructor for custom background object
+    /// </summary>
+    /// <param name="fileHandler">The registering mod's FileHandler</param>
+    /// <param name="backgroundInfo">Deserialized info object</param>
     internal BaseBackground(
         FileHandler fileHandler,
-        BackgroundInfo backgroundInfo)
+        BaseBackgroundInfo backgroundInfo)
     {
         this.info = backgroundInfo;
         switch (backgroundInfo.spriteType)
         {
-            case BackgroundInfo.SpriteType.Static:
+            case BaseBackgroundInfo.SpriteType.Static:
                 if (!TryImportSprite(fileHandler, backgroundInfo.spriteImportInfo, out sprite))
                 {
                     throw new ArgumentException($"Failed loading static background `{backgroundInfo.name}`!");
                 }
                 spriteSize = sprite.rect.size;
                 break;
-            case BackgroundInfo.SpriteType.Animated:
+            case BaseBackgroundInfo.SpriteType.Animated:
                 if (!TryImportAnimation(fileHandler, backgroundInfo.animationImportInfo, out animationInfo))
                 {
                     throw new ArgumentException($"Failed loading animated background `{backgroundInfo.name}`!");
@@ -101,7 +114,7 @@ public abstract class BaseBackground
                 break;
         }
 
-        if (backgroundInfo.acquisitionType == BackgroundInfo.AcquisitionType.OnFlag)
+        if (backgroundInfo.acquisitionType == BaseBackgroundInfo.AcquisitionType.OnFlag)
         {
             if (string.IsNullOrEmpty(backgroundInfo.acquisitionFlag))
             {
@@ -114,17 +127,30 @@ public abstract class BaseBackground
         }
     }
 
+    /// <summary>
+    /// Recommended constructor for custom background object. Handles JSON deserialization on its own.
+    /// </summary>
+    /// <param name="fileHandler">The registering mod's FileHandler</param>
+    /// <param name="backgroundInfoJsonFileLocation">JSON file location of `backgroundInfo`</param>
+    public BaseBackground(
+        FileHandler fileHandler,
+        string backgroundInfoJsonFileLocation)
+        : this(fileHandler, fileHandler.LoadDataAsJson<BaseBackgroundInfo>(backgroundInfoJsonFileLocation))
+    { }
+
+    /// <summary>
+    /// Initialize the GameObject, then set it to inactive.
+    /// </summary>
     internal virtual void InitializeGameObject()
     {
         gameObj = new GameObject($"Background[{info.name}]");
-        gameObj.transform.position = new Vector3(0f, 0f, 99f);
         gameObj.layer = LayerMask.NameToLayer("UI");
 
         // set RectTransform
         RectTransform rectTransform = gameObj.AddComponent<RectTransform>();
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-        rectTransform.pivot = new Vector2(0, 0);
+        rectTransform.pivot = new Vector2(0.5f, 0.5f);
 
         // set Image component
         Image image = gameObj.AddComponent<Image>();
@@ -134,10 +160,10 @@ public abstract class BaseBackground
         // add sprite/animation to Image
         switch (info.spriteType)
         {
-            case BackgroundInfo.SpriteType.Static:
+            case BaseBackgroundInfo.SpriteType.Static:
                 image.sprite = sprite;
                 break;
-            case BackgroundInfo.SpriteType.Animated:
+            case BaseBackgroundInfo.SpriteType.Animated:
                 ModImageAnimator anim = gameObj.AddComponent<ModImageAnimator>();
                 anim.Animation = animationInfo;
                 break;
@@ -148,17 +174,17 @@ public abstract class BaseBackground
         // configure RectTransform to assigned FitType
         switch (info.fitType)
         {
-            case BackgroundInfo.FitType.FitScreenRatio:
+            case BaseBackgroundInfo.FitType.FitScreenRatio:
                 image.preserveAspect = false;
                 rectTransform.sizeDelta = new Vector2(UI_WIDTH, UI_HEIGHT);
                 break;
-            case BackgroundInfo.FitType.KeepRatioFillScreen:
+            case BaseBackgroundInfo.FitType.KeepRatioFillScreen:
                 image.preserveAspect = true;
                 rectTransform.sizeDelta = (spriteSize.x / spriteSize.y) > (UI_WIDTH / UI_HEIGHT)
                     ? spriteSize / (spriteSize.y / UI_HEIGHT)
                     : spriteSize / (spriteSize.x / UI_WIDTH);
                 break;
-            case BackgroundInfo.FitType.KeepRatioFitScreen:
+            case BaseBackgroundInfo.FitType.KeepRatioFitScreen:
                 image.preserveAspect = true;
                 rectTransform.sizeDelta = (spriteSize.x / spriteSize.y) > (UI_WIDTH / UI_HEIGHT)
                     ? spriteSize / (spriteSize.x / UI_WIDTH)
@@ -167,10 +193,15 @@ public abstract class BaseBackground
             default:
                 throw new NotImplementedException();
         }
-        rectTransform.localPosition = rectTransform.sizeDelta / -2f;
+        rectTransform.localPosition = Vector3.zero;
+
+        // finalize initialization
         gameObj.SetActive(false);
     }
 
+    /// <summary>
+    /// Try importing animation by passing in AnimationImportInfo
+    /// </summary>
     protected internal virtual bool TryImportAnimation(
         FileHandler fileHandler,
         AnimationImportInfo importInfo,
@@ -192,6 +223,9 @@ public abstract class BaseBackground
         return true;
     }
 
+    /// <summary>
+    /// Try importing sprite by passing in SpriteImportInfo
+    /// </summary>
     protected internal virtual bool TryImportSprite(
         FileHandler fileHandler,
         SpriteImportInfo importInfo,
@@ -225,6 +259,9 @@ public abstract class BaseBackground
         isUnlocked = unlocked;
     }
 
+    /// <summary>
+    /// Display the pop-up of unlock information
+    /// </summary>
     protected internal virtual void ShowUnlockPopUp()
     {
         PatchController.unlockPopupBackgroundName = info.name;
@@ -232,7 +269,26 @@ public abstract class BaseBackground
         PatchController.unlockPopupBackgroundName = "";
     }
 
+    /// <summary>
+    /// Properly layer the background's GameObject on Blsphemous UI.
+    /// </summary>
     protected internal abstract void SetGameObjectLayer();
+
+    /// <summary>
+    /// Activate/Deactivate the background object.
+    /// </summary>
+    protected internal virtual void SetActive(bool active)
+    {
+        if (active == true)
+        {
+            GameObj.SetActive(true);
+            SetGameObjectLayer();
+        }
+        else
+        {
+            gameObj?.SetActive(false);
+        }
+    }
 
     /// <summary>
     /// Unlock the background when the corresponding flag is set to true

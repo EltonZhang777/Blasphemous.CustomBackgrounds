@@ -12,6 +12,9 @@ public static class BackgroundRegister
     private static readonly List<BaseBackground> _backgrounds = new();
     internal static IEnumerable<BaseBackground> Backgrounds => _backgrounds;
     internal static IEnumerable<MainMenuBackground> MainMenuBackgrounds => _backgrounds.OfType<MainMenuBackground>();
+    internal static IEnumerable<DeathBackground> DeathBackgrounds => _backgrounds.OfType<DeathBackground>();
+    internal static IEnumerable<LoadingBackground> LoadingBackgrounds => _backgrounds.OfType<LoadingBackground>();
+
     internal static int Total => _backgrounds.Count;
 
     internal static BaseBackground AtIndex(int index) => _backgrounds[index];

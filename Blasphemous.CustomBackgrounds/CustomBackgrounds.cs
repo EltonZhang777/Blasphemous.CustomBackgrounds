@@ -5,6 +5,7 @@ using Blasphemous.CustomBackgrounds.Events;
 using Blasphemous.CustomBackgrounds.Extensions;
 using Blasphemous.ModdingAPI;
 using Blasphemous.ModdingAPI.Helpers;
+using Framework.Managers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -81,6 +82,8 @@ public class CustomBackgrounds : BlasMod
 #if DEBUG
         provider.RegisterBackground(new MainMenuBackground(FileHandler, "test_background_static.json"));
         provider.RegisterBackground(new MainMenuBackground(FileHandler, "test_background_animated.json"));
+        provider.RegisterBackground(new DeathBackground(FileHandler, "test_death.json"));
+        provider.RegisterBackground(new LoadingBackground(FileHandler, "test_loading.json"));
 #endif
         provider.RegisterCommand(new BackgroundCommand());
     }
@@ -91,12 +94,23 @@ public class CustomBackgrounds : BlasMod
         LoadBackgroundSave();
 
         // show pop-up for auto-acquired backgrounds that aren't unlocked yet
-        foreach (BaseBackground background in BackgroundRegister.Backgrounds.Where(x => x.info.acquisitionType == BackgroundInfo.AcquisitionType.OnInitialize))
+        foreach (BaseBackground background in BackgroundRegister.Backgrounds.Where(x => x.info.acquisitionType == BaseBackgroundInfo.AcquisitionType.OnInitialize))
         {
             background.SetUnlocked(true);
         }
 
         SaveBackgroundSave();
+#if DEBUG
+        StringBuilder sb = new();
+        sb.AppendLine($"All backgrounds in register:");
+        for (int i = 0; i < BackgroundRegister.Total; i++)
+        {
+            sb.AppendLine($"#{i}: {BackgroundRegister.AtIndex(i).info.name}");
+            sb.AppendLine($"\n  [unlocked?: {BackgroundRegister.AtIndex(i).isUnlocked}]");
+            sb.AppendLine($"\n  [type: {BackgroundRegister.AtIndex(i).GetType()}]");
+        }
+        ModLog.Info(sb);
+#endif
     }
 
     protected override void OnLevelLoaded(string oldLevel, string newLevel)
@@ -107,6 +121,11 @@ public class CustomBackgrounds : BlasMod
             backgroundSaveData.currentModMainMenuBg = IsDisplayingModMainMenuBg
                 ? UnlockedMainMenuBackgrounds[ModMainMenuBgIndex].info.name
                 : "";
+#if DEBUG
+            // set flags of debug backgrounds to true
+            Core.Events.SetFlag(BackgroundRegister.DeathBackgrounds.First(x => x.info.name == "test_death").activeFlag, true);
+            Core.Events.SetFlag(BackgroundRegister.LoadingBackgrounds.First(x => x.info.name == "test_loading").activeFlag, true);
+#endif
         }
         else if (SceneHelper.MenuSceneLoaded)
         {
@@ -126,20 +145,6 @@ public class CustomBackgrounds : BlasMod
                     UnlockedMainMenuBackgrounds[ModMainMenuBgIndex].GameObj.SetActive(true);
                 }
             }
-#if DEBUG
-            StringBuilder sb = new();
-            sb.AppendLine($"All backgrounds in register:");
-            for (int i = 0; i < BackgroundRegister.Total; i++)
-            {
-                sb.AppendLine($"#{i}: {BackgroundRegister.AtIndex(i).info.name} [unlocked?: {BackgroundRegister.AtIndex(i).isUnlocked}]");
-            }
-            sb.AppendLine($"\nAll unlocked backgrounds:");
-            for (int i = 0; i < UnlockedMainMenuBackgrounds.Count; i++)
-            {
-                sb.AppendLine($"#{i}: {UnlockedMainMenuBackgrounds[i].info.name}");
-            }
-            ModLog.Info(sb);
-#endif
         }
     }
 
@@ -165,7 +170,6 @@ public class CustomBackgrounds : BlasMod
         bool hasNameNotFound = false;
         foreach (string name in backgroundSaveData.unlockedBackgrounds)
         {
-            ModLog.Warn($"background name: {name}");
             if (BackgroundRegister.AtName(name) == null)
             {
                 ModLog.Error($"Background of name {name} not found in Background Register! Failed to load it.");
@@ -185,7 +189,7 @@ public class CustomBackgrounds : BlasMod
 
     internal void SaveBackgroundSave()
     {
-        backgroundSaveData.unlockedBackgrounds = UnlockedMainMenuBackgrounds.Select(x => x.info.name).ToList();
+        backgroundSaveData.unlockedBackgrounds = UnlockedBackgrounds.Select(x => x.info.name).ToList();
         FileHandler.WriteJsonToContent(_saveFileName, backgroundSaveData);
     }
 }

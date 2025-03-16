@@ -1,5 +1,6 @@
 ﻿using Blasphemous.CheatConsole;
 using Blasphemous.CustomBackgrounds.Components.Backgrounds;
+using Framework.Managers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,8 @@ internal class BackgroundCommand : ModCommand
             { "list", SubCommand_List },
             { "unlock", SubCommand_Unlock },
             { "lock", SubCommand_Lock },
-            { "use", SubCommand_Use }
+            { "activate", SubCommand_Activate },
+            { "deactivate", SubCommand_Deactivate }
         };
 #if DEBUG
         result.Add("showpopup", SubCommand_ShowPopUp);
@@ -40,7 +42,8 @@ internal class BackgroundCommand : ModCommand
         Write($"{CommandName} list [unlocked/locked] : list all unlocked/locked backgrounds");
         Write($"{CommandName} unlock [patchName] : unlock the specified background");
         Write($"{CommandName} lock [patchName] : lock the specified background");
-        Write($"{CommandName} use [patchName] : use the specified background after returning to main menu. (does not work when executed in main menu)");
+        Write($"{CommandName} activate [patchName] : activate and use the specified background.");
+        Write($"{CommandName} activate [patchName] : deactivate the specified background. (does not work for main menu backgrounds)");
 #if DEBUG
         Write($"{CommandName} showpopup [patchName] : (debug use) show the unlock popup of specified background");
 #endif
@@ -58,8 +61,8 @@ internal class BackgroundCommand : ModCommand
             foreach (BaseBackground background in BackgroundRegister.Backgrounds)
             {
                 hasAny = true;
-                string unlockState = background.isUnlocked ? "unlocked" : "locked";
-                Write($"  {background.info.name}    [{unlockState}]");
+                string unlockState = background.isUnlocked ? "yes" : "no";
+                Write($"  {background.info.name}\n    [unlocked?: {unlockState}]\n    [type: {background.GetType()}]");
             }
             if (!hasAny)
             {
@@ -93,6 +96,10 @@ internal class BackgroundCommand : ModCommand
                 {
                     Write($"No background is found!");
                 }
+            }
+            else
+            {
+                Write($"Unknown parameter #0 `{parameters[0]}`!");
             }
         }
     }
@@ -136,7 +143,7 @@ internal class BackgroundCommand : ModCommand
         targetBackground.ShowUnlockPopUp();
     }
 
-    private void SubCommand_Use(string[] parameters)
+    private void SubCommand_Activate(string[] parameters)
     {
         if (!ValidateParameterList(parameters, 1))
             return;
@@ -146,11 +153,45 @@ internal class BackgroundCommand : ModCommand
             return;
 
         BaseBackground targetBackground = BackgroundRegister.Backgrounds.First(x => x.info.name.Equals(backgroundName));
-        if (targetBackground is MainMenuBackground)
+        switch (targetBackground)
         {
-            Main.CustomBackgrounds.backgroundSaveData.currentModMainMenuBg = targetBackground.info.name;
+            case MainMenuBackground mainMenuBackground:
+                Main.CustomBackgrounds.backgroundSaveData.currentModMainMenuBg = mainMenuBackground.info.name;
+                break;
+            case DeathBackground deathBackground:
+                Core.Events.SetFlag(deathBackground.activeFlag, true);
+                break;
+            case LoadingBackground loadingBackground:
+                Core.Events.SetFlag(loadingBackground.activeFlag, true);
+                break;
+            default:
+                Write($"Unsupported background type!");
+                break;
         }
-        // WIP for other types of backgrounds
+    }
+
+    private void SubCommand_Deactivate(string[] parameters)
+    {
+        if (!ValidateParameterList(parameters, 1))
+            return;
+
+        string backgroundName = parameters[0];
+        if (!BackgroundExists(backgroundName))
+            return;
+
+        BaseBackground targetBackground = BackgroundRegister.Backgrounds.First(x => x.info.name.Equals(backgroundName));
+        switch (targetBackground)
+        {
+            case DeathBackground deathBackground:
+                Core.Events.SetFlag(deathBackground.activeFlag, false);
+                break;
+            case LoadingBackground loadingBackground:
+                Core.Events.SetFlag(loadingBackground.activeFlag, false);
+                break;
+            default:
+                Write($"Unsupported background type!");
+                break;
+        }
     }
 
     private bool ValidateParameterList(string[] parameters, List<int> validParameterLengths)

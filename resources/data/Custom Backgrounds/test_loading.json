@@ -1,0 +1,17 @@
+{
+	"name": "smeel_loading",
+	"fileName": "test_animation.png",
+	"activeFlag": "test_death_active",
+	"disableVanillaLoadingIcon": false,
+	"localization": {
+		"en": "smeel loading"
+	},
+	"spriteType": "Animated",
+	"fitType": "FitScreenRatio",
+	"acquisitionType": "OnInitialize",
+	"animationImportInfo": {
+		"Width": 1920,
+		"Height": 1080,
+		"SecondsPerFrame": 0.03333
+	}
+}
