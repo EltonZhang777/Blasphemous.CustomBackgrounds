@@ -4,6 +4,7 @@ using Gameplay.UI;
 using HarmonyLib;
 using I2.Loc;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -41,11 +42,29 @@ internal static class PatchController
         else if (typeof(T) == typeof(LoadingBackground))
         {
             GameObject vanillaLoadingScreen = Traverse.Create(UIController.instance).Field("loadWidget").GetValue<GameObject>();
-            vanillaLoadingScreen.SetActive(false);
+            vanillaLoadingScreen.SetActive(active);
+        }
+        else if (typeof(T) == typeof(VictoryBackground))
+        {
+            UIController.instance.StartCoroutine(VictoryBackgroundCoroutine(active ? 6 : 2));
         }
         else
         {
             throw new NotImplementedException();
+        }
+
+        IEnumerator VictoryBackgroundCoroutine(int numRepeats = 1)
+        {
+            GameObject obj1 = GameObject.Find($"Game UI/Content/UI_FULLMESSAGES/Main Interface/Background/Area");
+            GameObject obj2 = GameObject.Find($"Game UI/Content/UI_FULLMESSAGES/Main Interface/Background/Boss");
+            GameObject obj3 = GameObject.Find($"Game UI/Content/UI_FULLMESSAGES/Main Interface/Background/EndBoss");
+            for (int i = 0; i < numRepeats; i++)
+            {
+                yield return new WaitForEndOfFrame();
+                obj1.SetActive(active);
+                obj2.SetActive(active);
+                obj3.SetActive(active);
+            }
         }
     }
 

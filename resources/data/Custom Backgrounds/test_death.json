@@ -1,7 +1,7 @@
 {
 	"name": "git_gud",
 	"fileName": "git_gud.png",
-	"activeFlag": "test_death_active",
+	"activeFlag": "custom_backgrounds_mod_debug",
 	"localization": {
 		"en": "Git Gud",
 		"zh": "菜就多练"

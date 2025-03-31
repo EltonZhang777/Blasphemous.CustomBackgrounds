@@ -1,7 +1,7 @@
 {
 	"name": "smeel_loading",
 	"fileName": "test_animation.png",
-	"activeFlag": "test_death_active",
+	"activeFlag": "custom_backgrounds_mod_debug",
 	"blocksVanillaCounterpart": false,
 	"localization": {
 		"en": "smeel loading"

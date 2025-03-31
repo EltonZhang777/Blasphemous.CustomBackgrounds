@@ -190,6 +190,10 @@ public abstract class BaseBackground
                     ? spriteSize / (spriteSize.x / UI_WIDTH)
                     : spriteSize / (spriteSize.y / UI_HEIGHT);
                 break;
+            case BaseBackgroundInfo.FitType.KeepOriginalResolution:
+                image.preserveAspect = true;
+                rectTransform.sizeDelta = spriteSize;
+                break;
             default:
                 throw new NotImplementedException();
         }

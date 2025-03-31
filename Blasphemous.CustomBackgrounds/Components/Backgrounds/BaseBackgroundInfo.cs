@@ -62,7 +62,7 @@ public class BaseBackgroundInfo
     /// See <see cref="AcquisitionType"/>
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
-    public AcquisitionType acquisitionType;
+    public AcquisitionType acquisitionType = AcquisitionType.OnInitialize;
 
     /// <summary>
     /// Information for importing static sprite
@@ -124,6 +124,11 @@ public class BaseBackgroundInfo
         /// <summary>
         /// Keep image original ratio, scale it up to fill screen.
         /// </summary>
-        KeepRatioFillScreen
+        KeepRatioFillScreen,
+
+        /// <summary>
+        /// Keep image original resolution and ratio (does not scale). 
+        /// </summary>
+        KeepOriginalResolution
     }
 }

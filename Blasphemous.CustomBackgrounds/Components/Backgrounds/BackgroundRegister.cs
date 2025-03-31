@@ -14,6 +14,7 @@ public static class BackgroundRegister
     internal static IEnumerable<MainMenuBackground> MainMenuBackgrounds => _backgrounds.OfType<MainMenuBackground>();
     internal static IEnumerable<DeathBackground> DeathBackgrounds => _backgrounds.OfType<DeathBackground>();
     internal static IEnumerable<LoadingBackground> LoadingBackgrounds => _backgrounds.OfType<LoadingBackground>();
+    internal static IEnumerable<VictoryBackground> VictoryBackgrounds => _backgrounds.OfType<VictoryBackground>();
 
     internal static int Total => _backgrounds.Count;
 

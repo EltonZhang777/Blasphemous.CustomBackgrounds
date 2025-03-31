@@ -6,12 +6,9 @@ using Blasphemous.CustomBackgrounds.Extensions;
 using Blasphemous.ModdingAPI;
 using Blasphemous.ModdingAPI.Helpers;
 using Framework.Managers;
-using Gameplay.UI;
-using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 
 namespace Blasphemous.CustomBackgrounds;
 
@@ -88,6 +85,8 @@ public class CustomBackgrounds : BlasMod
         provider.RegisterBackground(new MainMenuBackground(FileHandler, "test_background_animated.json"));
         provider.RegisterBackground(new DeathBackground(FileHandler, "test_death.json"));
         provider.RegisterBackground(new LoadingBackground(FileHandler, "test_loading.json"));
+        provider.RegisterBackground(new VictoryBackground(FileHandler, "test_victory_regular_boss.json"));
+        provider.RegisterBackground(new VictoryBackground(FileHandler, "test_victory_final_boss.json"));
 #endif
     }
 
@@ -118,17 +117,6 @@ public class CustomBackgrounds : BlasMod
 
     protected override void OnLevelLoaded(string oldLevel, string newLevel)
     {
-#if DEBUG
-        GameObject fullMessageObj = Traverse.Create(UIController.instance).Field("fullMessages").GetValue<GameObject>();
-        string hierarchyString = fullMessageObj.name;
-        Transform currentTransform = fullMessageObj.transform;
-        while (currentTransform.name != fullMessageObj.transform.root.name)
-        {
-            currentTransform = currentTransform.parent;
-            hierarchyString = $"{currentTransform.name}/" + hierarchyString;
-        }
-        ModLog.Warn($"full message GameObject hierarchy: {hierarchyString}");
-#endif
         if (SceneHelper.GameSceneLoaded)
         {
             // if displaying a mod background, store the currently displayed background's name
@@ -137,8 +125,7 @@ public class CustomBackgrounds : BlasMod
                 : "";
 #if DEBUG
             // set flags of debug backgrounds to true
-            Core.Events.SetFlag(BackgroundRegister.DeathBackgrounds.First(x => x.info.name == "test_death").info.activeFlag, true);
-            Core.Events.SetFlag(BackgroundRegister.LoadingBackgrounds.First(x => x.info.name == "test_loading").info.activeFlag, true);
+            Core.Events.SetFlag("custom_backgrounds_mod_debug", true);
 #endif
         }
         else if (SceneHelper.MenuSceneLoaded)
