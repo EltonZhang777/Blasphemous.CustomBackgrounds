@@ -159,10 +159,10 @@ internal class BackgroundCommand : ModCommand
                 Main.CustomBackgrounds.backgroundSaveData.currentModMainMenuBg = mainMenuBackground.info.name;
                 break;
             case DeathBackground deathBackground:
-                Core.Events.SetFlag(deathBackground.activeFlag, true);
+                Core.Events.SetFlag(deathBackground.info.activeFlag, true);
                 break;
             case LoadingBackground loadingBackground:
-                Core.Events.SetFlag(loadingBackground.activeFlag, true);
+                Core.Events.SetFlag(loadingBackground.info.activeFlag, true);
                 break;
             default:
                 Write($"Unsupported background type!");
@@ -183,10 +183,10 @@ internal class BackgroundCommand : ModCommand
         switch (targetBackground)
         {
             case DeathBackground deathBackground:
-                Core.Events.SetFlag(deathBackground.activeFlag, false);
+                Core.Events.SetFlag(deathBackground.info.activeFlag, false);
                 break;
             case LoadingBackground loadingBackground:
-                Core.Events.SetFlag(loadingBackground.activeFlag, false);
+                Core.Events.SetFlag(loadingBackground.info.activeFlag, false);
                 break;
             default:
                 Write($"Unsupported background type!");

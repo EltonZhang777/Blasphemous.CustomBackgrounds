@@ -31,6 +31,8 @@ public class MainMenuBackground : BaseBackground
         Transform targetTransform = GameObject.Find($"Game UI/Content/UI_MAINMENU/Menu").transform;
         gameObj.transform.SetParent(targetTransform, false);
         int index = GameObject.Find($"Game UI/Content/UI_MAINMENU/Menu/StaticBackground").transform.GetSiblingIndex();
-        gameObj.transform.SetSiblingIndex(index + 1);
+        gameObj.transform.SetSiblingIndex(info.blocksVanillaCounterpart
+            ? index + 1
+            : index - 1);
     }
 }

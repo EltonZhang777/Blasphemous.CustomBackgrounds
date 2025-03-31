@@ -34,7 +34,7 @@ class UIController_ShowLoad_ShowModLoadingBackground_Patch
         }
         else // loading screen is being activated by game
         {
-            List<LoadingBackground> activeBackgrounds = BackgroundRegister.LoadingBackgrounds.SelectUnlocked(true).ToList().Where(x => Core.Events.GetFlag(x.activeFlag)).ToList();
+            List<LoadingBackground> activeBackgrounds = BackgroundRegister.LoadingBackgrounds.SelectUnlocked(true).ToList().Where(x => Core.Events.GetFlag(x.info.activeFlag)).ToList();
 
             if (activeBackgrounds.Count == 0)
                 return;

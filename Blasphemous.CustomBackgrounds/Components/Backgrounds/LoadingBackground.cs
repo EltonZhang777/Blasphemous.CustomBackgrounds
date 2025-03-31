@@ -9,27 +9,22 @@ namespace Blasphemous.CustomBackgrounds.Components.Backgrounds;
 /// </summary>
 public class LoadingBackground : BaseBackground
 {
-    internal string activeFlag;
-    internal bool disableVanillaLoadingIcon;
-
     /// <inheritdoc/>
     protected override bool ShouldShowPopup => false;
 
     /// <inheritdoc/>
     public LoadingBackground(
         FileHandler fileHandler,
-        LoadingBackgroundInfo backgroundInfo)
+        BaseBackgroundInfo backgroundInfo)
         : base(fileHandler, backgroundInfo)
     {
-        this.activeFlag = backgroundInfo.activeFlag;
-        this.disableVanillaLoadingIcon = backgroundInfo.disableVanillaLoadingIcon;
     }
 
     /// <inheritdoc/>
     public LoadingBackground(
         FileHandler fileHandler,
         string backgroundInfoJsonFileLocation)
-        : this(fileHandler, fileHandler.LoadDataAsJson<LoadingBackgroundInfo>(backgroundInfoJsonFileLocation))
+        : this(fileHandler, fileHandler.LoadDataAsJson<BaseBackgroundInfo>(backgroundInfoJsonFileLocation))
     { }
 
     /// <inheritdoc/>
@@ -38,7 +33,7 @@ public class LoadingBackground : BaseBackground
         Transform targetTransform = GameObject.Find($"Game UI/Content/UI_LOADING").transform;
         gameObj.transform.SetParent(targetTransform, false);
         int index = GameObject.Find($"Game UI/Content/UI_LOADING/Icon").transform.GetSiblingIndex();
-        gameObj.transform.SetSiblingIndex(disableVanillaLoadingIcon
+        gameObj.transform.SetSiblingIndex(info.blocksVanillaCounterpart
             ? index + 1
             : index - 1);
     }

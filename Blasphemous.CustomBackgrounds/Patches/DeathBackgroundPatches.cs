@@ -22,7 +22,7 @@ class DeadScreenWidget_OnDeadAction_ShowModDeathBackground_Patch
         DeadScreenWidget __instance)
     {
         // Prefix
-        List<DeathBackground> activeBackgrounds = BackgroundRegister.DeathBackgrounds.SelectUnlocked(true).ToList().Where(x => Core.Events.GetFlag(x.activeFlag)).ToList();
+        List<DeathBackground> activeBackgrounds = BackgroundRegister.DeathBackgrounds.SelectUnlocked(true).ToList().Where(x => Core.Events.GetFlag(x.info.activeFlag)).ToList();
         if (activeBackgrounds.Count == 0)
             yield break;
 

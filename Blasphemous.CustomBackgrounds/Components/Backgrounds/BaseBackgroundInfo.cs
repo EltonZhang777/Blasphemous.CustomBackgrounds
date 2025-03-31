@@ -32,9 +32,19 @@ public class BaseBackgroundInfo
     public Dictionary<string, string> localization;
 
     /// <summary>
+    /// Whether this mod background is shown in front of its vanilla counterpart (i.e. blocks vanilla's visuals)
+    /// </summary>
+    public bool blocksVanillaCounterpart = true;
+
+    /// <summary>
     /// Background will be granted when this flag turns true
     /// </summary>
     public string acquisitionFlag = "";
+
+    /// <summary>
+    /// Conditionally-displayed background will be activated when this flag is true
+    /// </summary>
+    public string activeFlag = "";
 
     /// <summary>
     /// See <see cref="SpriteType"/>

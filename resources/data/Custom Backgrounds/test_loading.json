@@ -2,7 +2,7 @@
 	"name": "smeel_loading",
 	"fileName": "test_animation.png",
 	"activeFlag": "test_death_active",
-	"disableVanillaLoadingIcon": false,
+	"blocksVanillaCounterpart": false,
 	"localization": {
 		"en": "smeel loading"
 	},
