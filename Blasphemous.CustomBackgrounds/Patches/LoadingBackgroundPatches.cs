@@ -18,36 +18,63 @@ class UIController_ShowLoad_ShowModLoadingBackground_Patch
         UIController __instance,
         bool show)
     {
-        if (Core.GameModeManager.IsCurrentMode(GameModeManager.GAME_MODES.DEMAKE))
+        if (Core.GameModeManager.IsCurrentMode(GameModeManager.GAME_MODES.DEMAKE))  // arcade mini-game loading screen
         {
-            // can probably add support for mini-game loading screen later.
-            return;
-        }
-
-        // main-game loading screen
-        if (!show) // loading screen is being deactivated by game
-        {
-            // disable all mod loading backgrounds on close, re-enabling vanilla
-            BackgroundRegister.LoadingBackgrounds.SelectUnlocked(true).ToList().ForEach(x => x.SetActive(false));
-            PatchController.SetVanillaCounterpartActive<LoadingBackground>(true);
-            return;
-        }
-        else // loading screen is being activated by game
-        {
-            List<LoadingBackground> activeBackgrounds = BackgroundRegister.LoadingBackgrounds.SelectUnlocked(true).ToList().Where(x => Core.Events.GetFlag(x.info.activeFlag)).ToList();
-
-            if (activeBackgrounds.Count == 0)
-                return;
-
-            if (activeBackgrounds.Count > 1)
+            if (!show) // loading screen is being deactivated by game
             {
-                ModLog.Warn($"More than one LoadingBackgrounds are active simultaneously!");
+                // disable all mod loading backgrounds on close, re-enabling vanilla
+                BackgroundRegister.ArcadeLoadingBackgrounds.SelectUnlocked(true).ToList().ForEach(x => x.SetActive(false));
+                PatchController.SetVanillaCounterpartActive<ArcadeLoadingBackground>(true);
+                return;
             }
+            else // loading screen is being activated by game
+            {
+                List<ArcadeLoadingBackground> activeBackgrounds = BackgroundRegister.ArcadeLoadingBackgrounds.SelectUnlocked(true).ToList().Where(x => Core.Events.GetFlag(x.info.activeFlag)).ToList();
 
-            // enable mod backgrounds whose corresponding activeFlag is true
-            PatchController.SetVanillaCounterpartActive<LoadingBackground>(false);
-            activeBackgrounds.ForEach(x => x.SetActive(true));
+                if (activeBackgrounds.Count == 0)
+                    return;
+
+                if (activeBackgrounds.Count > 1)
+                {
+                    ModLog.Warn($"More than one LoadingBackgrounds are active simultaneously!");
+                }
+
+                // enable mod backgrounds whose corresponding activeFlag is true
+                if (activeBackgrounds.Any(x => x.info.disablesVanillaCounterpart))
+                {
+                    PatchController.SetVanillaCounterpartActive<ArcadeLoadingBackground>(false);
+                }
+                activeBackgrounds.ForEach(x => x.SetActive(true));
+            }
         }
+        else  // main-game loading screen
+        {
+            if (!show) // loading screen is being deactivated by game
+            {
+                // disable all mod loading backgrounds on close, re-enabling vanilla
+                BackgroundRegister.LoadingBackgrounds.SelectUnlocked(true).ToList().ForEach(x => x.SetActive(false));
+                PatchController.SetVanillaCounterpartActive<LoadingBackground>(true);
+                return;
+            }
+            else // loading screen is being activated by game
+            {
+                List<LoadingBackground> activeBackgrounds = BackgroundRegister.LoadingBackgrounds.SelectUnlocked(true).ToList().Where(x => Core.Events.GetFlag(x.info.activeFlag)).ToList();
 
+                if (activeBackgrounds.Count == 0)
+                    return;
+
+                if (activeBackgrounds.Count > 1)
+                {
+                    ModLog.Warn($"More than one LoadingBackgrounds are active simultaneously!");
+                }
+
+                // enable mod backgrounds whose corresponding activeFlag is true
+                if (activeBackgrounds.Any(x => x.info.disablesVanillaCounterpart))
+                {
+                    PatchController.SetVanillaCounterpartActive<LoadingBackground>(false);
+                }
+                activeBackgrounds.ForEach(x => x.SetActive(true));
+            }
+        }
     }
 }

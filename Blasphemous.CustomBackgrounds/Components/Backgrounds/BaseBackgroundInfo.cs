@@ -32,9 +32,14 @@ public class BaseBackgroundInfo
     public Dictionary<string, string> localization;
 
     /// <summary>
-    /// Whether this mod background is shown in front of its vanilla counterpart (i.e. blocks vanilla's visuals)
+    /// Whether this mod background disables its vanilla counterpart
     /// </summary>
     public bool blocksVanillaCounterpart = true;
+
+    /// <summary>
+    /// Whether this mod background is shown in front of its vanilla counterpart (i.e. blocks vanilla's visuals)
+    /// </summary>
+    public bool disablesVanillaCounterpart = true;
 
     /// <summary>
     /// Background will be granted when this flag turns true

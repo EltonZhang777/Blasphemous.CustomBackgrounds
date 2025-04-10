@@ -27,26 +27,58 @@ internal static class PatchController
     {
         if (typeof(T) == typeof(DeathBackground))
         {
-            GameObject obj = GameObject.Find($"Game UI/Content/UI_DEAD_SCREEN/Main Interface/DeathMessage");
-            obj.SetActive(active);
-            obj = GameObject.Find($"Game UI/Content/UI_DEAD_SCREEN/Main Interface/Background");
-            obj.SetActive(active);
+            List<GameObject> gameObjects =
+                [
+                GameObject.Find($"Game UI/Content/UI_DEAD_SCREEN/Main Interface/DeathMessage"),
+                GameObject.Find($"Game UI/Content/UI_DEAD_SCREEN/Main Interface/Background")
+                ];
+            gameObjects.ForEach(x => x.SetActive(active));
+        }
+        else if (typeof(T) == typeof(ArcadeDeathBackground))
+        {
+            List<GameObject> gameObjects =
+                [
+                GameObject.Find($"Game UI/Content/UI_DEAD_SCREEN/DemakeEdition/DeathMessage"),
+                GameObject.Find($"Game UI/Content/UI_DEAD_SCREEN/DemakeEdition/Background")
+                ];
+            gameObjects.ForEach(x => x.SetActive(active));
         }
         else if (typeof(T) == typeof(MainMenuBackground))
         {
-            GameObject obj = GameObject.Find($"Game UI/Content/UI_MAINMENU/Menu/StaticBackground");
-            obj.SetActive(active);
-            obj = GameObject.Find($"Game UI/Content/UI_MAINMENU/Menu/AnimatedBackgroundRoot");
-            obj.SetActive(active);
+            List<GameObject> gameObjects =
+                [
+                GameObject.Find($"Game UI/Content/UI_MAINMENU/Menu/StaticBackground"),
+                GameObject.Find($"Game UI/Content/UI_MAINMENU/Menu/AnimatedBackgroundRoot")
+                ];
+            gameObjects.ForEach(x => x.SetActive(active));
         }
         else if (typeof(T) == typeof(LoadingBackground))
         {
-            GameObject vanillaLoadingScreen = Traverse.Create(UIController.instance).Field("loadWidget").GetValue<GameObject>();
-            vanillaLoadingScreen.SetActive(active);
+            List<GameObject> gameObjects =
+                [
+                Traverse.Create(UIController.instance).Field("loadWidget").GetValue<GameObject>()
+                ];
+            gameObjects.ForEach(x => x.SetActive(active));
+        }
+        else if (typeof(T) == typeof(ArcadeLoadingBackground))
+        {
+            List<GameObject> gameObjects =
+                [
+                Traverse.Create(UIController.instance).Field("loadWidgetDemake").GetValue<GameObject>()
+                ];
+            gameObjects.ForEach(x => x.SetActive(active));
         }
         else if (typeof(T) == typeof(VictoryBackground))
         {
             UIController.instance.StartCoroutine(VictoryBackgroundCoroutine(active ? 6 : 2));
+        }
+        else if (typeof(T) == typeof(ArcadeIntroBackground))
+        {
+            List<GameObject> gameObjects =
+                [
+                GameObject.Find("Game UI/Content/UI_INTRODEMAKE/alcazar-bg")
+                ];
+            gameObjects.ForEach(x => x.SetActive(active));
         }
         else
         {
@@ -55,15 +87,16 @@ internal static class PatchController
 
         IEnumerator VictoryBackgroundCoroutine(int numRepeats = 1)
         {
-            GameObject obj1 = GameObject.Find($"Game UI/Content/UI_FULLMESSAGES/Main Interface/Background/Area");
-            GameObject obj2 = GameObject.Find($"Game UI/Content/UI_FULLMESSAGES/Main Interface/Background/Boss");
-            GameObject obj3 = GameObject.Find($"Game UI/Content/UI_FULLMESSAGES/Main Interface/Background/EndBoss");
+            List<GameObject> gameObjects =
+                [
+                GameObject.Find($"Game UI/Content/UI_FULLMESSAGES/Main Interface/Background/Area"),
+                GameObject.Find($"Game UI/Content/UI_FULLMESSAGES/Main Interface/Background/Boss"),
+                GameObject.Find($"Game UI/Content/UI_FULLMESSAGES/Main Interface/Background/EndBoss")
+                ];
             for (int i = 0; i < numRepeats; i++)
             {
                 yield return new WaitForEndOfFrame();
-                obj1.SetActive(active);
-                obj2.SetActive(active);
-                obj3.SetActive(active);
+                gameObjects.ForEach(x => x.SetActive(active));
             }
         }
     }
@@ -93,6 +126,7 @@ internal static class PatchController
         internal static string LocalizedPopupTitle => Main.CustomBackgrounds.LocalizationHandler.Localize(KEY_MODDED_UNLOCK_POPUP_TITLE);
         internal static string LocalizedPopupText => Main.CustomBackgrounds.LocalizationHandler.Localize(KEY_MODDED_UNLOCK_POPUP_TEXT);
 
+        [Obsolete("Now localizes unlock pop-up by directly managing GameObject's text.")]
         internal static bool TryWriteTermToGame(string termKey, string termContent)
         {
             bool result = false;
@@ -112,6 +146,7 @@ internal static class PatchController
             return result;
         }
 
+        [Obsolete("Now localizes unlock pop-up by directly managing GameObject's text.")]
         internal static void StoreVanillaTranslation(string termKey)
         {
             string vanillaText = "";

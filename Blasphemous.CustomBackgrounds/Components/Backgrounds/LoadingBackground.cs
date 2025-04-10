@@ -31,8 +31,9 @@ public class LoadingBackground : BaseBackground
     protected internal override void SetGameObjectLayer()
     {
         Transform targetTransform = GameObject.Find($"Game UI/Content/UI_LOADING").transform;
-        gameObj.transform.SetParent(targetTransform, false);
         int index = GameObject.Find($"Game UI/Content/UI_LOADING/Icon").transform.GetSiblingIndex();
+
+        gameObj.transform.SetParent(targetTransform, false);
         gameObj.transform.SetSiblingIndex(info.blocksVanillaCounterpart
             ? index + 1
             : index - 1);

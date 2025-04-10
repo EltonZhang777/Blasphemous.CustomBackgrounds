@@ -5,22 +5,23 @@ using UnityEngine;
 namespace Blasphemous.CustomBackgrounds.Components.Backgrounds;
 
 /// <summary>
-/// Custom death screen background object
+/// Custom loading screen background object for arcade mini-game
 /// </summary>
-public class DeathBackground : BaseBackground
+public class ArcadeLoadingBackground : BaseBackground
 {
     /// <inheritdoc/>
     protected override bool ShouldShowPopup => false;
 
     /// <inheritdoc/>
-    public DeathBackground(
+    public ArcadeLoadingBackground(
         FileHandler fileHandler,
         BaseBackgroundInfo backgroundInfo)
         : base(fileHandler, backgroundInfo)
-    { }
+    {
+    }
 
     /// <inheritdoc/>
-    public DeathBackground(
+    public ArcadeLoadingBackground(
         FileHandler fileHandler,
         string backgroundInfoJsonFileLocation)
         : this(fileHandler, fileHandler.LoadDataAsJson<BaseBackgroundInfo>(backgroundInfoJsonFileLocation))
@@ -29,8 +30,8 @@ public class DeathBackground : BaseBackground
     /// <inheritdoc/>
     protected internal override void SetGameObjectLayer()
     {
-        Transform targetTransform = GameObject.Find($"Game UI/Content/UI_DEAD_SCREEN/Main Interface").transform;
-        int index = GameObject.Find($"Game UI/Content/UI_DEAD_SCREEN/Main Interface/DeathMessage").transform.GetSiblingIndex();
+        Transform targetTransform = GameObject.Find($"Game UI/Content/UI_LOADING_DEMAKE").transform;
+        int index = GameObject.Find($"Game UI/Content/UI_LOADING_DEMAKE/Icon").transform.GetSiblingIndex();
 
         gameObj.transform.SetParent(targetTransform, false);
         gameObj.transform.SetSiblingIndex(info.blocksVanillaCounterpart

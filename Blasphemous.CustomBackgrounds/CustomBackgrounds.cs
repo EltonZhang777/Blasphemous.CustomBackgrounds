@@ -12,6 +12,9 @@ using System.Text;
 
 namespace Blasphemous.CustomBackgrounds;
 
+/// <summary>
+/// Master class for CustomBackgrounds mod
+/// </summary>
 public class CustomBackgrounds : BlasMod
 {
     internal Config config;
@@ -84,9 +87,11 @@ public class CustomBackgrounds : BlasMod
         provider.RegisterBackground(new MainMenuBackground(FileHandler, "test_background_static.json"));
         provider.RegisterBackground(new MainMenuBackground(FileHandler, "test_background_animated.json"));
         provider.RegisterBackground(new DeathBackground(FileHandler, "test_death.json"));
+        provider.RegisterBackground(new ArcadeDeathBackground(FileHandler, "test_death_demake.json"));
         provider.RegisterBackground(new LoadingBackground(FileHandler, "test_loading.json"));
         provider.RegisterBackground(new VictoryBackground(FileHandler, "test_victory_regular_boss.json"));
         provider.RegisterBackground(new VictoryBackground(FileHandler, "test_victory_final_boss.json"));
+        provider.RegisterBackground(new ArcadeIntroBackground(FileHandler, "test_minigame_intro.json"));
 #endif
     }
 
@@ -173,7 +178,7 @@ public class CustomBackgrounds : BlasMod
         {
             if (BackgroundRegister.AtName(name) == null)
             {
-                ModLog.Error($"Background of name {name} not found in Background Register! Failed to load it.");
+                ModLog.Error($"Background of name `{name}` not found in Background Register! Failed to load it.");
                 hasNameNotFound = true;
             }
             else

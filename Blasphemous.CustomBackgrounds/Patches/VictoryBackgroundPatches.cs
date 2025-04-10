@@ -31,7 +31,10 @@ class UIController_ShowFullMessageCourrutine_ShowModVictoryScreen_Patch
         {
             ModLog.Warn($"More than one VictoryBackgrounds are active simultaneously!");
         }
-        PatchController.SetVanillaCounterpartActive<VictoryBackground>(false);
+        if (activeBackgrounds.Any(x => x.info.disablesVanillaCounterpart))
+        {
+            PatchController.SetVanillaCounterpartActive<VictoryBackground>(false);
+        }
         activeBackgrounds.ForEach(x => x.SetActive(true));
 
         // execute vanilla IEnumerator coroutine
