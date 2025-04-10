@@ -1,0 +1,16 @@
+{
+	"name": "GG2EZ_FinalBoss",
+	"fileName": "test_victory_final_boss.png",
+	"localization": {
+		"en": "GG2EZ"
+	},
+	"blocksVanillaCounterpart": true,
+	"activeFlag": "custom_backgrounds_mod_debug",
+	"spriteType": "Static",
+	"fitType": "KeepOriginalResolution",
+	"acquisitionType": "OnInitialize",
+	"spriteImportInfo": {
+        "PixelsPerUnit": 32
+	},
+	"victoryType": "EndBossDefeated"
+}

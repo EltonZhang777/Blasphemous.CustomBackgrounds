@@ -9,7 +9,7 @@
     <Authors>NewbieElton</Authors>
     <Company>NewbieElton</Company>
     <Description>A Blasphemous 1 mod that allows this mod and other mods to create custom main menu background image or aminations.</Description>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
 
     <TargetName>CustomBackgrounds</TargetName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -21,8 +21,8 @@
 
   <ItemGroup>
     <PackageReference Include="Blasphemous.CheatConsole" Version="1.0.1" />
+    <PackageReference Include="Blasphemous.GameLibs" Version="4.0.67" />
     <PackageReference Include="Blasphemous.ModdingAPI" Version="2.4.1" />
-    <PackageReference Include="Blasphemous.ModdingReferences" Version="4.0.67" />
   </ItemGroup>
 
   <Target Name="Development" AfterTargets="PostBuildEvent">

@@ -43,7 +43,10 @@ class NewMainMenu_ProcessMoveInput_IndexExtension_Patch
         }
 
         // enable mod background and disable vanilla background
-        PatchController.SetVanillaCounterpartActive<MainMenuBackground>(false);
+        if (Main.CustomBackgrounds.UnlockedMainMenuBackgrounds[Main.CustomBackgrounds.ModMainMenuBgIndex].info.disablesVanillaCounterpart)
+        {
+            PatchController.SetVanillaCounterpartActive<MainMenuBackground>(false);
+        }
         Main.CustomBackgrounds.UnlockedMainMenuBackgrounds[Main.CustomBackgrounds.ModMainMenuBgIndex].SetActive(true);
 
         // update background selection's displayed label text
@@ -82,7 +85,10 @@ class NewMainMenu_Awake_UpdateBackgroundIndexToModIndex_Patch
             ModLog.Warn($"Main.CustomBackgrounds.BackgroundIndex: {Main.CustomBackgrounds.MainMenuBgIndex}");
 #endif
             // enable mod background and disable vanilla background
-            PatchController.SetVanillaCounterpartActive<MainMenuBackground>(false);
+            if (Main.CustomBackgrounds.UnlockedMainMenuBackgrounds[Main.CustomBackgrounds.ModMainMenuBgIndex].info.disablesVanillaCounterpart)
+            {
+                PatchController.SetVanillaCounterpartActive<MainMenuBackground>(false);
+            }
             Main.CustomBackgrounds.UnlockedMainMenuBackgrounds[Main.CustomBackgrounds.ModMainMenuBgIndex].SetActive(true);
         }
     }

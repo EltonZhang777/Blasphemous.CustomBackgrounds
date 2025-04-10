@@ -1,8 +1,10 @@
 ﻿using Blasphemous.CheatConsole;
 using Blasphemous.CustomBackgrounds.Components.Backgrounds;
 using Framework.Managers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -27,6 +29,7 @@ internal class BackgroundCommand : ModCommand
         };
 #if DEBUG
         result.Add("showpopup", SubCommand_ShowPopUp);
+        result.Add("exportjson", SubCommand_ExportToJson);
 #endif
 
         return result;
@@ -46,6 +49,7 @@ internal class BackgroundCommand : ModCommand
         Write($"{CommandName} activate [patchName] : deactivate the specified background. (does not work for main menu backgrounds)");
 #if DEBUG
         Write($"{CommandName} showpopup [patchName] : (debug use) show the unlock popup of specified background");
+        Write($"{CommandName} exportjson [patchName] : (debug use) export the info of specified background to JSON file");
 #endif
     }
 
@@ -159,10 +163,10 @@ internal class BackgroundCommand : ModCommand
                 Main.CustomBackgrounds.backgroundSaveData.currentModMainMenuBg = mainMenuBackground.info.name;
                 break;
             case DeathBackground deathBackground:
-                Core.Events.SetFlag(deathBackground.activeFlag, true);
+                Core.Events.SetFlag(deathBackground.info.activeFlag, true);
                 break;
             case LoadingBackground loadingBackground:
-                Core.Events.SetFlag(loadingBackground.activeFlag, true);
+                Core.Events.SetFlag(loadingBackground.info.activeFlag, true);
                 break;
             default:
                 Write($"Unsupported background type!");
@@ -183,15 +187,31 @@ internal class BackgroundCommand : ModCommand
         switch (targetBackground)
         {
             case DeathBackground deathBackground:
-                Core.Events.SetFlag(deathBackground.activeFlag, false);
+                Core.Events.SetFlag(deathBackground.info.activeFlag, false);
                 break;
             case LoadingBackground loadingBackground:
-                Core.Events.SetFlag(loadingBackground.activeFlag, false);
+                Core.Events.SetFlag(loadingBackground.info.activeFlag, false);
                 break;
             default:
                 Write($"Unsupported background type!");
                 break;
         }
+    }
+
+    private void SubCommand_ExportToJson(string[] parameters)
+    {
+        if (!ValidateParameterList(parameters, 1))
+            return;
+
+        string backgroundName = parameters[0];
+        if (!BackgroundExists(backgroundName))
+            return;
+
+        string exportPath = Path.Combine(Main.CustomBackgrounds.FileHandler.ContentFolder, $"exported--{backgroundName}.json");
+        File.WriteAllText(
+            exportPath,
+            JsonConvert.SerializeObject(BackgroundRegister.AtName(backgroundName).info, Formatting.Indented));
+        Write($"Successfully exported `{backgroundName}` info to `{exportPath}`!");
     }
 
     private bool ValidateParameterList(string[] parameters, List<int> validParameterLengths)

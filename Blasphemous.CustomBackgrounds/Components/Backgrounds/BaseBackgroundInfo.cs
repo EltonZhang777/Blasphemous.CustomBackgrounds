@@ -32,9 +32,24 @@ public class BaseBackgroundInfo
     public Dictionary<string, string> localization;
 
     /// <summary>
+    /// Whether this mod background disables its vanilla counterpart
+    /// </summary>
+    public bool blocksVanillaCounterpart = true;
+
+    /// <summary>
+    /// Whether this mod background is shown in front of its vanilla counterpart (i.e. blocks vanilla's visuals)
+    /// </summary>
+    public bool disablesVanillaCounterpart = true;
+
+    /// <summary>
     /// Background will be granted when this flag turns true
     /// </summary>
     public string acquisitionFlag = "";
+
+    /// <summary>
+    /// Conditionally-displayed background will be activated when this flag is true
+    /// </summary>
+    public string activeFlag = "";
 
     /// <summary>
     /// See <see cref="SpriteType"/>
@@ -52,7 +67,7 @@ public class BaseBackgroundInfo
     /// See <see cref="AcquisitionType"/>
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
-    public AcquisitionType acquisitionType;
+    public AcquisitionType acquisitionType = AcquisitionType.OnInitialize;
 
     /// <summary>
     /// Information for importing static sprite
@@ -114,6 +129,11 @@ public class BaseBackgroundInfo
         /// <summary>
         /// Keep image original ratio, scale it up to fill screen.
         /// </summary>
-        KeepRatioFillScreen
+        KeepRatioFillScreen,
+
+        /// <summary>
+        /// Keep image original resolution and ratio (does not scale). 
+        /// </summary>
+        KeepOriginalResolution
     }
 }
