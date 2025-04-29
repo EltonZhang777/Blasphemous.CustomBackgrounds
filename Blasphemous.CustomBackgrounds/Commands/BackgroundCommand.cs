@@ -160,7 +160,7 @@ internal class BackgroundCommand : ModCommand
         switch (targetBackground)
         {
             case MainMenuBackground mainMenuBackground:
-                Main.CustomBackgrounds.backgroundSaveData.currentModMainMenuBg = mainMenuBackground.info.name;
+                Main.CustomBackgrounds.globalSaveData.currentModMainMenuBg = mainMenuBackground.info.name;
                 break;
             case DeathBackground deathBackground:
                 Core.Events.SetFlag(deathBackground.info.activeFlag, true);

@@ -1,5 +1,4 @@
 ﻿using Blasphemous.CustomBackgrounds.Components.Animations;
-using Blasphemous.CustomBackgrounds.Components.Sprites;
 using Blasphemous.CustomBackgrounds.Extensions;
 using Blasphemous.CustomBackgrounds.Patches;
 using Blasphemous.ModdingAPI;
@@ -99,14 +98,14 @@ public abstract class BaseBackground
         switch (backgroundInfo.spriteType)
         {
             case BaseBackgroundInfo.SpriteType.Static:
-                if (!TryImportSprite(fileHandler, backgroundInfo.spriteImportInfo, out sprite))
+                if (!Main.TryImportSprite(fileHandler, info.fileName, backgroundInfo.spriteImportInfo, out sprite))
                 {
                     throw new ArgumentException($"Failed loading static background `{backgroundInfo.name}`!");
                 }
                 spriteSize = sprite.rect.size;
                 break;
             case BaseBackgroundInfo.SpriteType.Animated:
-                if (!TryImportAnimation(fileHandler, backgroundInfo.animationImportInfo, out animationInfo))
+                if (!Main.TryImportAnimation(fileHandler, info.fileName, backgroundInfo.animationImportInfo, out animationInfo))
                 {
                     throw new ArgumentException($"Failed loading animated background `{backgroundInfo.name}`!");
                 }
@@ -201,53 +200,6 @@ public abstract class BaseBackground
 
         // finalize initialization
         gameObj.SetActive(false);
-    }
-
-    /// <summary>
-    /// Try importing animation by passing in AnimationImportInfo
-    /// </summary>
-    protected internal virtual bool TryImportAnimation(
-        FileHandler fileHandler,
-        AnimationImportInfo importInfo,
-        out AnimationInfo animationInfo)
-    {
-        var options = new SpriteImportOptions()
-        {
-            Pivot = new Vector2(0.5f, 0)
-        };
-
-        if (!fileHandler.LoadDataAsFixedSpritesheet(info.fileName, new Vector2(importInfo.Width, importInfo.Height), out Sprite[] spritesheet, options))
-        {
-            ModLog.Error($"Failed to load {info.name} from {info.fileName}");
-            animationInfo = null;
-            return false;
-        }
-
-        animationInfo = new AnimationInfo(spritesheet, importInfo.SecondsPerFrame);
-        return true;
-    }
-
-    /// <summary>
-    /// Try importing sprite by passing in SpriteImportInfo
-    /// </summary>
-    protected internal virtual bool TryImportSprite(
-        FileHandler fileHandler,
-        SpriteImportInfo importInfo,
-        out Sprite sprite)
-    {
-        var options = new SpriteImportOptions()
-        {
-            Pivot = new Vector2(importInfo.Pivot.X, importInfo.Pivot.Y),
-            PixelsPerUnit = importInfo.PixelsPerUnit,
-        };
-
-        if (!fileHandler.LoadDataAsSprite(info.fileName, out sprite, options))
-        {
-            ModLog.Error($"Failed to load sprite at `{info.fileName}`!");
-            return false;
-        }
-
-        return true;
     }
 
     /// <summary>

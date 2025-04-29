@@ -72,14 +72,14 @@ class NewMainMenu_Awake_UpdateBackgroundIndexToModIndex_Patch
 
         hasExecuted = true;
         // if background name in save isn't valid, read from vanilla.
-        bool shouldReadVanilla = (!Main.CustomBackgrounds.backgroundSaveData.currentIsModMainMenuBg) || !BackgroundRegister.Exists(Main.CustomBackgrounds.backgroundSaveData.currentModMainMenuBg, true);
+        bool shouldReadVanilla = (!Main.CustomBackgrounds.globalSaveData.currentIsModMainMenuBg) || !BackgroundRegister.Exists(Main.CustomBackgrounds.globalSaveData.currentModMainMenuBg, true);
         if (shouldReadVanilla)
         {
             Main.CustomBackgrounds.MainMenuBgIndex = __instance.bgIndex;
         }
         else
         {
-            Main.CustomBackgrounds.MainMenuBgIndex = 4 + Main.CustomBackgrounds.UnlockedMainMenuBackgrounds.IndexOf(Main.CustomBackgrounds.UnlockedMainMenuBackgrounds.First(x => x.info.name == Main.CustomBackgrounds.backgroundSaveData.currentModMainMenuBg));
+            Main.CustomBackgrounds.MainMenuBgIndex = 4 + Main.CustomBackgrounds.UnlockedMainMenuBackgrounds.IndexOf(Main.CustomBackgrounds.UnlockedMainMenuBackgrounds.First(x => x.info.name == Main.CustomBackgrounds.globalSaveData.currentModMainMenuBg));
 #if DEBUG
             ModLog.Warn($"Applying mod background on startup!");
             ModLog.Warn($"Main.CustomBackgrounds.BackgroundIndex: {Main.CustomBackgrounds.MainMenuBgIndex}");

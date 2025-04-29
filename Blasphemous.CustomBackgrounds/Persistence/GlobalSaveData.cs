@@ -1,12 +1,12 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Blasphemous.CustomBackgrounds;
+namespace Blasphemous.CustomBackgrounds.Persistence;
 
 /// <summary>
-/// Contains data that should be saved across game sessions.
+/// Contains global persistence data that are independent of in-game save slots.
 /// </summary>
-public class BackgroundSaveData
+public class GlobalSaveData
 {
     /// <summary>
     /// Currently displayed mod background's name.
